@@ -1,10 +1,14 @@
-import React from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
-import '../styles/App.css';
+import React, { useState } from "react";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import TestModal from "./TestModal";
+import "../styles/App.css";
 
 const TestSection = () => {
+  const [showTestModal, setShowTestModal] = useState(false);
+  const [userId] = useState("user_123"); // Замените на реальный ID пользователя
+
   const handleStartTest = () => {
-    alert('Well-being test is starting...');
+    setShowTestModal(true);
   };
 
   return (
@@ -15,8 +19,9 @@ const TestSection = () => {
             <div className="fade-in-animation">
               <h2 className="section-title mb-4">Well-Being Test</h2>
               <p className="section-description mb-4">
-                Take our comprehensive well-being assessment to understand your current
-                mental health status. Get personalized insights based on your answers.
+                Take our comprehensive well-being assessment to understand your
+                current mental health status. Get personalized insights based on
+                your answers.
               </p>
               <ul className="test-benefits">
                 <li>✓ Quick and easy assessment</li>
@@ -39,6 +44,12 @@ const TestSection = () => {
           </Col>
         </Row>
       </Container>
+
+      <TestModal
+        show={showTestModal}
+        onHide={() => setShowTestModal(false)}
+        userId={userId}
+      />
     </section>
   );
 };

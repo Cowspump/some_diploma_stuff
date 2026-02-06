@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import NavbarComponent from './components/Navbar';
 import Hero from './components/Hero';
 import MaterialsSection from './components/MaterialsSection';
 import TestSection from './components/TestSection';
+import TestResultsHistory from './components/TestResultsHistory';
 import AIAssistantSection from './components/AIAssistantSection';
 import MoodJournal from './components/MoodJournal';
 import BurnoutScale from './components/BurnoutScale';
@@ -12,6 +14,7 @@ import './styles/App.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId] = useState('user_123'); // ID пользователя
 
   const handleLoginClick = () => {
     setIsLoggedIn(true);
@@ -39,6 +42,7 @@ function App() {
       <Hero />
       <MaterialsSection />
       <TestSection />
+      {isLoggedIn && <TestResultsHistory userId={userId} />}
       <AIAssistantSection />
       <MoodJournal isLoggedIn={isLoggedIn} />
       <BurnoutScale />

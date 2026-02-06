@@ -1,0 +1,263 @@
+.ai-chat-modal .modal-xl {
+  max-width: 1200px;
+}
+
+.ai-chat-body {
+  height: 600px;
+  display: flex;
+}
+
+.chat-container {
+  display: flex;
+  width: 100%;
+  gap: 0;
+}
+
+/* Левая панель - Рекомендации */
+.recommendations-panel {
+  flex: 0 0 35%;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: #f8f9fa;
+  overflow-y: auto;
+}
+
+.recommendations-header {
+  margin-bottom: 20px;
+}
+
+.recommendations-header h5 {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.recommendations-header small {
+  display: block;
+  margin-top: 4px;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.recommendation-card {
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #6c63ff;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recommendation-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(4px);
+}
+
+.recommendation-card.urgency {
+  border-left-color: #ff6b6b;
+}
+
+.recommendation-card.analytics {
+  border-left-color: #4ecdc4;
+}
+
+.recommendation-card.wellness {
+  border-left-color: #95e1d3;
+}
+
+.recommendation-card.journal {
+  border-left-color: #ffd93d;
+}
+
+.recommendation-card.general {
+  border-left-color: #a29bfe;
+}
+
+.recommendation-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.recommendation-text {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Правая панель - Чат */
+.chat-panel {
+  flex: 0 0 65%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-right: 8px;
+}
+
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.message {
+  display: flex;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.ai {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  word-wrap: break-word;
+}
+
+.message-content.user {
+  background: #6c63ff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-content.ai {
+  background: #e9ecef;
+  color: #333;
+  border-bottom-left-radius: 4px;
+}
+
+.message-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.message-time {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Контейнер ввода */
+.input-container {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 16px;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.input-wrapper .form-control {
+  flex: 1;
+  border-radius: 24px;
+  border: 1px solid #ddd;
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+.input-wrapper .form-control:focus {
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+}
+
+.send-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: #6c63ff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #5a52d5;
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+  .ai-chat-modal .modal-xl {
+    max-width: 95vw;
+  }
+
+  .chat-container {
+    flex-direction: column;
+  }
+
+  .recommendations-panel {
+    flex: 0 0 auto;
+    max-height: 250px;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .chat-panel {
+    flex: 1;
+  }
+
+  .message-content {
+    max-width: 90%;
+  }
+}

@@ -1,0 +1,39 @@
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.form-check {
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px !important;
+    transition: all 0.3s ease;
+}
+
+.form-check:hover {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+}
+
+.form-check input:checked ~ .form-check-label {
+    color: #667eea;
+    font-weight: 500;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background-color: #e0e0e0;
+}
