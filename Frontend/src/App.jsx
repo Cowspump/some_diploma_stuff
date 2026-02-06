@@ -17,12 +17,14 @@ import BurnoutScale from "./components/BurnoutScale";
 import AnalyticsSection from "./components/AnalyticsSection";
 import Footer from "./components/Footer";
 import AdminDashboard from "./pages/AdminDashboard";
-import TherapistDashboard from './pages/TherapistDashboard';
+import TherapistDashboard from "./pages/TherapistDashboard";
 
 import "./styles/App.css";
 
 function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState("login");
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId] = useState("user_123");
   const [userRole, setUserRole] = useState(null);
@@ -100,8 +102,14 @@ function App() {
     <Router>
       <div className="app">
         <NavbarComponent
-          onLoginClick={() => setShowAuthModal(true)}
-          onSignUpClick={() => setShowAuthModal(true)}
+          onLoginClick={() => {
+            setAuthModalTab("login");
+            setShowAuthModal(true);
+          }}
+          onSignUpClick={() => {
+            setAuthModalTab("signup");
+            setShowAuthModal(true);
+          }}
           isLoggedIn={isLoggedIn}
           onLogoutClick={handleLogout}
           user={userData}
@@ -110,6 +118,7 @@ function App() {
           show={showAuthModal}
           handleClose={() => setShowAuthModal(false)}
           onAuthSuccess={handleAuthSuccess}
+          initialTab={authModalTab}
         />
         <Hero />
         <MaterialsSection />

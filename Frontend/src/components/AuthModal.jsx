@@ -1,27 +1,37 @@
+import React, { useState, useEffect } from "react";
+import { Modal, Form, Button, Tabs, Tab, Alert } from "react-bootstrap";
+import "../styles/AuthModal.css";
 
-import React, { useState } from 'react';
-import { Modal, Form, Button, Tabs, Tab, Alert } from 'react-bootstrap';
-import '../styles/AuthModal.css';
-
-const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
-  const [activeTab, setActiveTab] = useState('login');
-  const [error, setError] = useState('');
+const AuthModal = ({
+  show,
+  handleClose,
+  onAuthSuccess,
+  initialTab = "login",
+}) => {
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      setActiveTab(initialTab);
+    }
+  }, [show, initialTab]);
 
   // Login state
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   // Sign up state
   const [signupData, setSignupData] = useState({
-    fullName: '',
-    email: '',
-    birthDate: '',
-    role: 'worker',
-    password: '',
-    confirmPassword: '',
+    fullName: "",
+    email: "",
+    birthDate: "",
+    role: "worker",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleLoginChange = (e) => {
@@ -30,7 +40,7 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
       ...prev,
       [name]: value,
     }));
-    setError('');
+    setError("");
   };
 
   const handleSignupChange = (e) => {
@@ -39,28 +49,28 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
       ...prev,
       [name]: value,
     }));
-    setError('');
+    setError("");
   };
 
   const validateSignupForm = () => {
     if (!signupData.fullName.trim()) {
-      setError('Пожалуйста, введите ФИО');
+      setError("Пожалуйста, введите ФИО");
       return false;
     }
     if (!signupData.email.trim()) {
-      setError('Пожалуйста, введите почту');
+      setError("Пожалуйста, введите почту");
       return false;
     }
     if (!signupData.birthDate) {
-      setError('Пожалуйста, выберите дату рождения');
+      setError("Пожалуйста, выберите дату рождения");
       return false;
     }
     if (signupData.password !== signupData.confirmPassword) {
-      setError('Пароли не совпадают');
+      setError("Пароли не совпадают");
       return false;
     }
     if (signupData.password.length < 6) {
-      setError('Пароль должен быть не менее 6 символов');
+      setError("Пароль должен быть не менее 6 символов");
       return false;
     }
     return true;
@@ -68,23 +78,23 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // TODO: Добавьте ваш API запрос сюда
-      console.log('Login:', loginData);
+      console.log("Login:", loginData);
 
       // Имитация успешного входа
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       onAuthSuccess({
-        type: 'login',
+        type: "login",
         email: loginData.email,
       });
       handleClose();
     } catch (err) {
-      setError('Ошибка входа. Проверьте почту и пароль.');
+      setError("Ошибка входа. Проверьте почту и пароль.");
     } finally {
       setLoading(false);
     }
@@ -98,32 +108,38 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
       return;
     }
 
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // TODO: Добавьте ваш API запрос сюда
-      console.log('Signup:', signupData);
+      console.log("Signup:", signupData);
 
       // Имитация успешной регистрации
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       onAuthSuccess({
-        type: 'signup',
+        type: "signup",
         email: signupData.email,
         role: signupData.role,
         fullName: signupData.fullName,
       });
       handleClose();
     } catch (err) {
-      setError('Ошибка регистрации. Попробуйте позже.');
+      setError("Ошибка регистрации. Попробуйте позже.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal show={show} onHide={handleClose} centered size="lg" className="auth-modal">
+    <Modal
+      show={show}
+      onHide={handleClose}
+      centered
+      size="lg"
+      className="auth-modal"
+    >
       <Modal.Header closeButton>
         <Modal.Title className="fw-bold">WellBeing Аутентификация</Modal.Title>
       </Modal.Header>
@@ -134,7 +150,7 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
           activeKey={activeTab}
           onSelect={(k) => {
             setActiveTab(k);
-            setError('');
+            setError("");
           }}
           className="mb-3"
         >
@@ -173,7 +189,7 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
                 className="w-100 btn-auth"
                 disabled={loading}
               >
-                {loading ? 'Входим...' : 'Войти'}
+                {loading ? "Входим..." : "Войти"}
               </Button>
             </Form>
           </Tab>
@@ -260,7 +276,7 @@ const AuthModal = ({ show, handleClose, onAuthSuccess }) => {
                 className="w-100 btn-auth"
                 disabled={loading}
               >
-                {loading ? 'Регистрируемся...' : 'Создать аккаунт'}
+                {loading ? "Регистрируемся..." : "Создать аккаунт"}
               </Button>
             </Form>
           </Tab>
