@@ -1,6 +1,7 @@
-// Симуляция API для вопросов теста (потом заменить на реальную БД)
+// Сервис тестов: простая реализация через localStorage
+
+// Получение списка вопросов (заглушка)
 export const fetchTestQuestions = async () => {
-  // Временные данные - замените на реальный API запрос
   return [
     {
       id: 1,
@@ -30,11 +31,9 @@ export const saveTestResult = async (userId, answers, score) => {
     score,
   };
 
-  // Сохранение в localStorage (потом заменить на API запрос)
   const results = JSON.parse(localStorage.getItem("testResults") || "[]");
   results.push(result);
   localStorage.setItem("testResults", JSON.stringify(results));
-
   return result;
 };
 

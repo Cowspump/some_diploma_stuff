@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Button, Tabs, Tab, Alert } from "react-bootstrap";
+import { useAuth } from "../contexts/AuthContext";
+import { authService } from "../services/authService";
 import "../styles/AuthModal.css";
 
-const AuthModal = ({
-  show,
-  handleClose,
-  onAuthSuccess,
-  initialTab = "login",
-}) => {
+const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   useEffect(() => {
     if (show) {
       setActiveTab(initialTab);
+      setError("");
     }
   }, [show, initialTab]);
 
@@ -69,8 +68,8 @@ const AuthModal = ({
       setError("Пароли не совпадают");
       return false;
     }
-    if (signupData.password.length < 6) {
-      setError("Пароль должен быть не менее 6 символов");
+    if (signupData.password.length < 8) {
+      setError("Пароль должен быть не менее 8 символов");
       return false;
     }
     return true;
@@ -82,19 +81,18 @@ const AuthModal = ({
     setLoading(true);
 
     try {
-      // TODO: Добавьте ваш API запрос сюда
-      console.log("Login:", loginData);
+      const response = await authService.login(
+        loginData.email,
+        loginData.password,
+      );
 
-      // Имитация успешного входа
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      onAuthSuccess({
-        type: "login",
-        email: loginData.email,
-      });
+      login(response.user, response.access_token);
       handleClose();
+
+      // Очистка формы
+      setLoginData({ email: "", password: "" });
     } catch (err) {
-      setError("Ошибка входа. Проверьте почту и пароль.");
+      setError(err.message || "Ошибка входа. Проверьте почту и пароль.");
     } finally {
       setLoading(false);
     }
@@ -104,7 +102,6 @@ const AuthModal = ({
     e.preventDefault();
 
     if (!validateSignupForm()) {
-      setLoading(false);
       return;
     }
 
@@ -112,21 +109,22 @@ const AuthModal = ({
     setLoading(true);
 
     try {
-      // TODO: Добавьте ваш API запрос сюда
-      console.log("Signup:", signupData);
+      const response = await authService.register(signupData);
 
-      // Имитация успешной регистрации
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      onAuthSuccess({
-        type: "signup",
-        email: signupData.email,
-        role: signupData.role,
-        fullName: signupData.fullName,
-      });
+      login(response.user, response.access_token);
       handleClose();
+
+      // Очистка формы
+      setSignupData({
+        fullName: "",
+        email: "",
+        birthDate: "",
+        role: "worker",
+        password: "",
+        confirmPassword: "",
+      });
     } catch (err) {
-      setError("Ошибка регистрации. Попробуйте позже.");
+      setError(err.message || "Ошибка регистрации. Попробуйте позже.");
     } finally {
       setLoading(false);
     }

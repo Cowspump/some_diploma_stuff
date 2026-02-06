@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import NavbarComponent from "./components/Navbar";
 import AuthModal from "./components/AuthModal";
 import Hero from "./components/Hero";
@@ -21,7 +22,7 @@ import TherapistDashboard from "./pages/TherapistDashboard";
 
 import "./styles/App.css";
 
-function App() {
+function AppContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState("login");
 
@@ -100,38 +101,43 @@ function App() {
   // Главная страница для рабочих и неавторизованных пользователей
   return (
     <Router>
-      <div className="app">
-        <NavbarComponent
-          onLoginClick={() => {
-            setAuthModalTab("login");
-            setShowAuthModal(true);
-          }}
-          onSignUpClick={() => {
-            setAuthModalTab("signup");
-            setShowAuthModal(true);
-          }}
-          isLoggedIn={isLoggedIn}
-          onLogoutClick={handleLogout}
-          user={userData}
-        />
-        <AuthModal
-          show={showAuthModal}
-          handleClose={() => setShowAuthModal(false)}
-          onAuthSuccess={handleAuthSuccess}
-          initialTab={authModalTab}
-        />
-        <Hero />
-        <MaterialsSection />
-        <TestSection />
-        {isLoggedIn && <TestResultsHistory userId={userId} />}
-        <AIAssistantSection />
-        <MoodJournal isLoggedIn={isLoggedIn} />
-        <BurnoutScale />
-        <AnalyticsSection />
-        <Footer />
-      </div>
+      <AuthProvider>
+        <div className="app">
+          <NavbarComponent
+            onLoginClick={() => {
+              setAuthModalTab("login");
+              setShowAuthModal(true);
+            }}
+            onSignUpClick={() => {
+              setAuthModalTab("signup");
+              setShowAuthModal(true);
+            }}
+            isLoggedIn={isLoggedIn}
+            onLogoutClick={handleLogout}
+            user={userData}
+          />
+          <AuthModal
+            show={showAuthModal}
+            handleClose={() => setShowAuthModal(false)}
+            initialTab={authModalTab}
+          />
+          <Hero />
+          <MaterialsSection />
+          <TestSection />
+          {isLoggedIn && <TestResultsHistory userId={userId} />}
+          <AIAssistantSection />
+          <MoodJournal isLoggedIn={isLoggedIn} />
+          <BurnoutScale />
+          <AnalyticsSection />
+          <Footer />
+        </div>
+      </AuthProvider>
     </Router>
   );
+}
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;

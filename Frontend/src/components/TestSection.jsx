@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
+import { useAuth } from "../contexts/AuthContext";
 import TestModal from "./TestModal";
 import "../styles/App.css";
 
 const TestSection = () => {
   const [showTestModal, setShowTestModal] = useState(false);
-  const [userId] = useState("user_123"); // Замените на реальный ID пользователя
+  const { user, isAuthenticated } = useAuth();
 
   const handleStartTest = () => {
     setShowTestModal(true);
@@ -48,7 +49,7 @@ const TestSection = () => {
       <TestModal
         show={showTestModal}
         onHide={() => setShowTestModal(false)}
-        userId={userId}
+        userId={user?.id || "guest"}
       />
     </section>
   );

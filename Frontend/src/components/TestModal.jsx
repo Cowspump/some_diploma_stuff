@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Form, ProgressBar } from "react-bootstrap";
+import { Modal, Button, Form, ProgressBar, Alert } from "react-bootstrap";
 import { fetchTestQuestions, saveTestResult } from "../services/testService";
 import "../styles/TestModal.css";
 
@@ -10,6 +10,7 @@ const TestModal = ({ show, onHide, userId }) => {
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (show) {
@@ -19,6 +20,7 @@ const TestModal = ({ show, onHide, userId }) => {
 
   const loadQuestions = async () => {
     setLoading(true);
+    setError("");
     try {
       const data = await fetchTestQuestions();
       setQuestions(data);
@@ -28,6 +30,7 @@ const TestModal = ({ show, onHide, userId }) => {
       setScore(0);
     } catch (error) {
       console.error("Ошибка загрузки вопросов:", error);
+      setError("Не удалось загрузить вопросы. Попробуйте позже.");
     } finally {
       setLoading(false);
     }
@@ -56,12 +59,16 @@ const TestModal = ({ show, onHide, userId }) => {
     const calculatedScore =
       Object.keys(answers).length === questions.length ? 75 : 50;
     setScore(calculatedScore);
+    setLoading(true);
 
     try {
       await saveTestResult(userId || "guest", answers, calculatedScore);
       setSubmitted(true);
     } catch (error) {
       console.error("Ошибка сохранения результата:", error);
+      setError("Не удалось сохранить результат. Попробуйте позже.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,6 +95,11 @@ const TestModal = ({ show, onHide, userId }) => {
         <Modal.Title>Тест благополучия</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {error && (
+          <Alert variant="danger" className="mb-3">
+            {error}
+          </Alert>
+        )}
         {!submitted ? (
           <>
             <ProgressBar
