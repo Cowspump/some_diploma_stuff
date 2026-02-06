@@ -10,50 +10,58 @@ class ApiService {
 
   getAuthHeaders() {
     const token = localStorage.getItem('token');
-    return token ? { ...this.defaultHeaders, 'Authorization': `Bearer ${token}` } : this.defaultHeaders;
+    return token
+      ? { ...this.defaultHeaders, 'Authorization': `Bearer ${token}` }
+      : this.defaultHeaders;
   }
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    const config = {
-      headers: this.getAuthHeaders(),
-      ...options,
-      headers: {
-        ...this.getAuthHeaders(),
-        ...options.headers,
-      },
-    };
-
-    let lastError;
     const maxRetries = 3;
+    const timeout = 10000;
+    let lastError;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      let timeoutId;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        timeoutId = setTimeout(() => controller.abort(), timeout);
 
         const response = await fetch(url, {
-          ...config,
+          ...options,
+          headers: {
+            ...this.getAuthHeaders(),
+            ...options.headers,
+          },
           signal: controller.signal,
         });
 
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          let errorData = {};
+          try {
+            errorData = await response.json();
+          } catch {
+            errorData = { detail: `HTTP error! status: ${response.status}` };
+          }
           throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
         }
 
         return await response.json();
       } catch (error) {
+        clearTimeout(timeoutId);
         lastError = error;
 
-        if (attempt === maxRetries || error.name === 'AbortError') {
+        // Не повторять для абортов и последней попытки
+        if (error.name === 'AbortError' || attempt === maxRetries) {
           break;
         }
 
-        // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        // Экспоненциальная задержка
+        await new Promise(resolve =>
+          setTimeout(resolve, Math.pow(2, attempt) * 1000)
+        );
       }
     }
 
