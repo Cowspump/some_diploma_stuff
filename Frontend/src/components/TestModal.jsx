@@ -23,6 +23,7 @@ const TestModal = ({ show, onHide, userId }) => {
     setError("");
     try {
       const data = await fetchTestQuestions();
+      // Backend возвращает вопросы с полями: id, text, options (где options - массив объектов {text, points})
       setQuestions(data);
       setCurrentQuestion(0);
       setAnswers({});
@@ -36,10 +37,10 @@ const TestModal = ({ show, onHide, userId }) => {
     }
   };
 
-  const handleAnswerChange = (e) => {
+  const handleAnswerChange = (optionIndex) => {
     setAnswers({
       ...answers,
-      [questions[currentQuestion].id]: e.target.value,
+      [questions[currentQuestion].id]: optionIndex,
     });
   };
 
@@ -56,13 +57,12 @@ const TestModal = ({ show, onHide, userId }) => {
   };
 
   const handleSubmit = async () => {
-    const calculatedScore =
-      Object.keys(answers).length === questions.length ? 75 : 50;
-    setScore(calculatedScore);
     setLoading(true);
 
     try {
-      await saveTestResult(userId || "guest", answers, calculatedScore);
+      // Backend ожидает answers: {question_id: selected_option_index}
+      const response = await saveTestResult(answers);
+      setScore(response.total_score || 0);
       setSubmitted(true);
     } catch (error) {
       console.error("Ошибка сохранения результата:", error);
@@ -110,18 +110,18 @@ const TestModal = ({ show, onHide, userId }) => {
 
             {questions.length > 0 && (
               <div>
-                <h5 className="mb-3">{questions[currentQuestion].question}</h5>
+                <h5 className="mb-3">{questions[currentQuestion].text}</h5>
                 <Form>
                   {questions[currentQuestion].options.map((option, idx) => (
                     <Form.Check
                       key={idx}
                       type="radio"
                       name="answer"
-                      label={option}
-                      value={option}
-                      onChange={handleAnswerChange}
+                      label={option.text}
+                      value={idx}
+                      onChange={() => handleAnswerChange(idx)}
                       checked={
-                        answers[questions[currentQuestion].id] === option
+                        answers[questions[currentQuestion].id] === idx
                       }
                       className="mb-2"
                     />
@@ -150,11 +150,11 @@ const TestModal = ({ show, onHide, userId }) => {
             >
               ← Назад
             </Button>
-            {currentQuestion === questions.length - 1 ? (
+            {questions.length > 0 && currentQuestion === questions.length - 1 ? (
               <Button
                 variant="primary"
                 onClick={handleSubmit}
-                disabled={!answers[questions[currentQuestion].id]}
+                disabled={!questions[currentQuestion] || answers[questions[currentQuestion].id] === undefined}
               >
                 Завершить →
               </Button>
@@ -162,7 +162,7 @@ const TestModal = ({ show, onHide, userId }) => {
               <Button
                 variant="primary"
                 onClick={handleNext}
-                disabled={!answers[questions[currentQuestion].id]}
+                disabled={!questions[currentQuestion] || answers[questions[currentQuestion]?.id] === undefined}
               >
                 Далее →
               </Button>

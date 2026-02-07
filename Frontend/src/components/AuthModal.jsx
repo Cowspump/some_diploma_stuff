@@ -23,11 +23,10 @@ const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
     password: "",
   });
 
-  // Sign up state
+  // Sign up state (backend не требует birthDate)
   const [signupData, setSignupData] = useState({
     fullName: "",
     email: "",
-    birthDate: "",
     role: "worker",
     password: "",
     confirmPassword: "",
@@ -60,10 +59,6 @@ const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
       setError("Пожалуйста, введите почту");
       return false;
     }
-    if (!signupData.birthDate) {
-      setError("Пожалуйста, выберите дату рождения");
-      return false;
-    }
     if (signupData.password !== signupData.confirmPassword) {
       setError("Пароли не совпадают");
       return false;
@@ -86,8 +81,12 @@ const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
         loginData.password,
       );
 
+      // Сохраняем роль пользователя в response.user
       login(response.user, response.access_token);
       handleClose();
+
+      // Перезагружаем страницу для правильной маршрутизации
+      window.location.reload();
 
       // Очистка формы
       setLoginData({ email: "", password: "" });
@@ -109,16 +108,20 @@ const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
     setLoading(true);
 
     try {
-      const response = await authService.register(signupData);
+      await authService.register(signupData);
 
-      login(response.user, response.access_token);
+      // После успешной регистрации логиним пользователя
+      const loginResponse = await authService.login(signupData.email, signupData.password);
+      login(loginResponse.user, loginResponse.access_token);
       handleClose();
+
+      // Перезагружаем страницу для правильной маршрутизации
+      window.location.reload();
 
       // Очистка формы
       setSignupData({
         fullName: "",
         email: "",
-        birthDate: "",
         role: "worker",
         password: "",
         confirmPassword: "",
@@ -220,17 +223,6 @@ const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Дата рождения</Form.Label>
-                <Form.Control
-                  type="date"
-                  name="birthDate"
-                  value={signupData.birthDate}
-                  onChange={handleSignupChange}
-                  disabled={loading}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
                 <Form.Label>Роль</Form.Label>
                 <Form.Select
                   name="role"
@@ -240,7 +232,6 @@ const AuthModal = ({ show, handleClose, initialTab = "login" }) => {
                 >
                   <option value="worker">Рабочий</option>
                   <option value="therapist">Терапевт</option>
-                  <option value="admin">Администратор</option>
                 </Form.Select>
               </Form.Group>
 

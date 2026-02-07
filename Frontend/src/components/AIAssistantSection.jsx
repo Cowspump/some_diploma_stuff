@@ -1,39 +1,10 @@
-
-import React, { useState } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
-import AIChatModal from './AIChatModal';
-import '../styles/App.css';
+import React, { useState } from "react";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import AIChatModal from "./AIChatModal";
+import "../styles/App.css";
 
 const AIAssistantSection = () => {
   const [showChatModal, setShowChatModal] = useState(false);
-
-  // Пример данных (в реальном приложении они будут из БД)
-  const journalHistory = [
-    {
-      id: 1,
-      date: new Date('2026-02-01'),
-      mood: 'neutral',
-      content: 'Продуктивный день, но чувствую усталость к концу дня.',
-    },
-    {
-      id: 2,
-      date: new Date('2026-02-02'),
-      mood: 'happy',
-      content: 'Отличный день! Много положительных моментов.',
-    },
-    {
-      id: 3,
-      date: new Date('2026-02-03'),
-      mood: 'anxious',
-      content: 'Беспокойство из-за предстоящих задач.',
-    },
-  ];
-
-  const testResults = [
-    { id: 1, name: 'Стресс-тест', score: 65, date: new Date('2026-02-01') },
-    { id: 2, name: 'Выгорание', score: 55, date: new Date('2026-02-03') },
-    { id: 3, name: 'Благополучие', score: 72, date: new Date('2026-02-05') },
-  ];
 
   const handleStartChat = () => {
     setShowChatModal(true);
@@ -48,8 +19,9 @@ const AIAssistantSection = () => {
               <div className="fade-in-animation">
                 <h2 className="section-title mb-4">AI-Powered Assistant</h2>
                 <p className="section-description mb-4">
-                  Chat with our intelligent assistant trained to provide emotional support
-                  and personalized recommendations for your well-being journey.
+                  Chat with our intelligent assistant trained to provide
+                  emotional support and personalized recommendations for your
+                  well-being journey.
                 </p>
                 <div className="ai-features">
                   <div className="feature-item">
@@ -85,8 +57,6 @@ const AIAssistantSection = () => {
       <AIChatModal
         show={showChatModal}
         onHide={() => setShowChatModal(false)}
-        journalHistory={journalHistory}
-        testResults={testResults}
       />
     </>
   );

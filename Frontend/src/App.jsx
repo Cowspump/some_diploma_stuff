@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import NavbarComponent from "./components/Navbar";
 import AuthModal from "./components/AuthModal";
 import Hero from "./components/Hero";
@@ -23,121 +23,101 @@ import TherapistDashboard from "./pages/TherapistDashboard";
 import "./styles/App.css";
 
 function AppContent() {
+  const { user, logout, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState("login");
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId] = useState("user_123");
-  const [userRole, setUserRole] = useState(null);
-  const [userData, setUserData] = useState(null);
-
-  // Восстановление сессии при загрузке
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setUserData(user);
-      setUserRole(user.role);
-      setIsLoggedIn(true);
-    }
-  }, []);
-
-  const handleAuthSuccess = (authData) => {
-    const user = {
-      id: Math.random().toString(36).substr(2, 9),
-      email: authData.email,
-      role: authData.role || "worker",
-      fullName: authData.fullName || "",
-    };
-
-    setUserData(user);
-    setUserRole(user.role);
-    setIsLoggedIn(true);
-
-    // Сохранить в localStorage
-    localStorage.setItem("user", JSON.stringify(user));
-
-    setShowAuthModal(false);
-  };
-
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole(null);
-    setUserData(null);
-    localStorage.removeItem("user");
+    logout();
+    window.location.reload();
   };
 
-  // Если пользователь администратор или терапевт - переходим на их страницы
-  if (isLoggedIn && userRole === "admin") {
+  // Показываем индикатор загрузки пока проверяем сессию
+  if (loading) {
     return (
-      <Router>
-        <Routes>
-          <Route
-            path="/admin"
-            element={<AdminDashboard user={userData} onLogout={handleLogout} />}
-          />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
-        </Routes>
-      </Router>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "100vh" }}
+      >
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Загрузка...</span>
+        </div>
+      </div>
     );
   }
 
-  if (isLoggedIn && userRole === "therapist") {
+  // Если пользователь администратор или терапевт - переходим на их страницы
+  if (user && user.role === "admin") {
     return (
-      <Router>
-        <Routes>
-          <Route
-            path="/therapist"
-            element={
-              <TherapistDashboard user={userData} onLogout={handleLogout} />
-            }
-          />
-          <Route path="*" element={<Navigate to="/therapist" replace />} />
-        </Routes>
-      </Router>
+      <Routes>
+        <Route
+          path="/admin"
+          element={<AdminDashboard user={user} onLogout={handleLogout} />}
+        />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
+
+  if (user && user.role === "therapist") {
+    return (
+      <Routes>
+        <Route
+          path="/therapist"
+          element={<TherapistDashboard user={user} onLogout={handleLogout} />}
+        />
+        <Route path="*" element={<Navigate to="/therapist" replace />} />
+      </Routes>
     );
   }
 
   // Главная страница для рабочих и неавторизованных пользователей
   return (
-    <Router>
-      <AuthProvider>
-        <div className="app">
-          <NavbarComponent
-            onLoginClick={() => {
-              setAuthModalTab("login");
-              setShowAuthModal(true);
-            }}
-            onSignUpClick={() => {
-              setAuthModalTab("signup");
-              setShowAuthModal(true);
-            }}
-            isLoggedIn={isLoggedIn}
-            onLogoutClick={handleLogout}
-            user={userData}
-          />
-          <AuthModal
-            show={showAuthModal}
-            handleClose={() => setShowAuthModal(false)}
-            initialTab={authModalTab}
-          />
-          <Hero />
-          <MaterialsSection />
+    <div className="app">
+      <NavbarComponent
+        onLoginClick={() => {
+          setAuthModalTab("login");
+          setShowAuthModal(true);
+        }}
+        onSignUpClick={() => {
+          setAuthModalTab("signup");
+          setShowAuthModal(true);
+        }}
+        isLoggedIn={!!user}
+        onLogoutClick={handleLogout}
+        user={user}
+      />
+      <AuthModal
+        show={showAuthModal}
+        handleClose={() => setShowAuthModal(false)}
+        initialTab={authModalTab}
+      />
+      <Hero />
+      <MaterialsSection />
+      {/* Показываем компоненты только для workers и неавторизованных */}
+      {(!user || user.role === "worker") && (
+        <>
           <TestSection />
-          {isLoggedIn && <TestResultsHistory userId={userId} />}
+          {user && <TestResultsHistory userId={user.id} />}
           <AIAssistantSection />
-          <MoodJournal isLoggedIn={isLoggedIn} />
-          <BurnoutScale />
-          <AnalyticsSection />
-          <Footer />
-        </div>
-      </AuthProvider>
-    </Router>
+          <MoodJournal isLoggedIn={!!user} />
+        </>
+      )}
+      <BurnoutScale />
+      <AnalyticsSection />
+      <Footer />
+    </div>
   );
 }
 
 function App() {
-  return <AppContent />;
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
+  );
 }
 
 export default App;

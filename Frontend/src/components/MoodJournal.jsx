@@ -9,38 +9,46 @@ import {
   Card,
   Badge,
 } from "react-bootstrap";
+import { apiService } from "../services/api";
 import "../styles/App.css";
 
 const MoodJournal = ({ isLoggedIn }) => {
   const [moodEntry, setMoodEntry] = useState("");
-  const [currentMood, setCurrentMood] = useState("neutral");
+  const [currentMood, setCurrentMood] = useState(3); // Backend использует 0-5
   const [submitted, setSubmitted] = useState(false);
   const [entries, setEntries] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const moodOptions = [
-    { value: "very-bad", label: "😢", name: "Very Bad", score: 1 },
-    { value: "bad", label: "😟", name: "Bad", score: 2 },
-    { value: "neutral", label: "😐", name: "Neutral", score: 3 },
-    { value: "good", label: "🙂", name: "Good", score: 4 },
-    { value: "very-good", label: "😄", name: "Very Good", score: 5 },
+    { value: 0, label: "😢", name: "Very Bad", score: 0 },
+    { value: 1, label: "😟", name: "Bad", score: 1 },
+    { value: 2, label: "😐", name: "Neutral", score: 2 },
+    { value: 3, label: "🙂", name: "Good", score: 3 },
+    { value: 4, label: "😄", name: "Very Good", score: 4 },
+    { value: 5, label: "🤩", name: "Excellent", score: 5 },
   ];
 
-  // Загрузка записей из localStorage при монтировании
+  // Загрузка записей с backend
   useEffect(() => {
-    const savedEntries = localStorage.getItem("moodEntries");
-    if (savedEntries) {
-      setEntries(JSON.parse(savedEntries));
+    if (isLoggedIn) {
+      loadJournals();
     }
-  }, []);
+  }, [isLoggedIn]);
 
-  // Сохранение записей в localStorage при их изменении
-  useEffect(() => {
-    localStorage.setItem("moodEntries", JSON.stringify(entries));
-  }, [entries]);
+  const loadJournals = async () => {
+    try {
+      const response = await apiService.get("/journal");
+      setEntries(response.journals || []);
+    } catch (error) {
+      console.error("Error loading journals:", error);
+      setError("Не удалось загрузить записи");
+    }
+  };
 
   const getMoodScore = (moodValue) => {
-    return moodOptions.find((mood) => mood.value === moodValue)?.score || 0;
+    return moodValue;
   };
 
   const getMoodName = (moodValue) => {
@@ -54,37 +62,48 @@ const MoodJournal = ({ isLoggedIn }) => {
   const calculateAverageMood = () => {
     if (entries.length === 0) return 0;
     const totalScore = entries.reduce(
-      (sum, entry) => sum + getMoodScore(entry.mood),
+      (sum, entry) => sum + (entry.wellbeing_score || 0),
       0,
     );
     return (totalScore / entries.length).toFixed(2);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (moodEntry.trim()) {
-      const newEntry = {
-        id: Date.now(),
-        mood: currentMood,
-        text: moodEntry,
-        date: new Date().toLocaleDateString("ru-RU", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setEntries([newEntry, ...entries]);
+    if (!moodEntry.trim()) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await apiService.post("/journal", {
+        score: currentMood,
+        note: moodEntry,
+      });
+
       setMoodEntry("");
-      setCurrentMood("neutral");
+      setCurrentMood(3);
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
+
+      // Перезагружаем записи
+      await loadJournals();
+    } catch (error) {
+      console.error("Error saving journal:", error);
+      setError("Не удалось сохранить запись");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const deleteEntry = (id) => {
-    setEntries(entries.filter((entry) => entry.id !== id));
+  const deleteEntry = async (id) => {
+    try {
+      await apiService.delete(`/journal/${id}`);
+      setEntries(entries.filter((entry) => entry.id !== id));
+    } catch (error) {
+      console.error("Error deleting journal:", error);
+      setError("Не удалось удалить запись");
+    }
   };
 
   const getAverageMoodLevel = () => {
@@ -151,12 +170,18 @@ const MoodJournal = ({ isLoggedIn }) => {
                       <Button
                         type="submit"
                         className="btn-primary-custom"
-                        disabled={!moodEntry.trim()}
+                        disabled={!moodEntry.trim() || loading}
                       >
-                        Save Entry
+                        {loading ? "Saving..." : "Save Entry"}
                       </Button>
                     </div>
                   </Form>
+
+                  {error && (
+                    <Alert variant="danger" className="mt-4 border-0">
+                      {error}
+                    </Alert>
+                  )}
 
                   {submitted && (
                     <Alert variant="success" className="mt-4 border-0">
@@ -210,16 +235,26 @@ const MoodJournal = ({ isLoggedIn }) => {
                             <div className="flex-grow-1">
                               <div className="d-flex align-items-center gap-2 mb-2">
                                 <span className="fs-5">
-                                  {getMoodLabel(entry.mood)}
+                                  {getMoodLabel(entry.wellbeing_score)}
                                 </span>
                                 <Badge bg="info">
-                                  {getMoodName(entry.mood)}
+                                  {getMoodName(entry.wellbeing_score)}
                                 </Badge>
                                 <small className="text-muted">
-                                  {entry.date}
+                                  {new Date(
+                                    entry.created_at,
+                                  ).toLocaleDateString("ru-RU", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </small>
                               </div>
-                              <p className="mb-0 text-break">{entry.text}</p>
+                              <p className="mb-0 text-break">
+                                {entry.note_text || ""}
+                              </p>
                             </div>
                             <Button
                               variant="outline-danger"

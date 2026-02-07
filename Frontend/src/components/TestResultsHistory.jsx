@@ -20,22 +20,30 @@ const TestResultsHistory = ({ userId }) => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    loadResults();
+    // Загружаем только если есть токен (авторизованы)
+    const token = localStorage.getItem('token');
+    if (token) {
+      loadResults();
+    }
   }, [userId]);
 
   const loadResults = async () => {
     setLoading(true);
     setError("");
     try {
-      const testResults = await getTestResults(userId);
+      const testResults = await getTestResults();
+      // Backend возвращает массив с полями: id, total_score, created_at
       setResults(
-        testResults.sort(
-          (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
+        (testResults || []).sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at),
         ),
       );
     } catch (error) {
-      console.error("Error loading results:", error);
-      setError("Не удалось загрузить результаты. Попробуйте позже.");
+      // Игнорируем ошибки 403 для не-workers
+      if (!error.message?.includes("Only workers")) {
+        console.error("Error loading results:", error);
+        setError("Не удалось загрузить результаты. Попробуйте позже.");
+      }
     } finally {
       setLoading(false);
     }
@@ -137,16 +145,16 @@ const TestResultsHistory = ({ userId }) => {
                             Тест #{results.length - index}
                           </h5>
                           <p className="text-muted small mb-0">
-                            {formatDate(result.timestamp)}
+                            {formatDate(result.created_at)}
                           </p>
                         </div>
-                        {getScoreBadge(result.score)}
+                        {getScoreBadge(result.total_score)}
                       </div>
 
                       <div className="score-display mb-3">
                         <div className="score-circle">
-                          <span className="score-value">{result.score}</span>
-                          <span className="score-max">/100</span>
+                          <span className="score-value">{result.total_score}</span>
+                          <span className="score-max"></span>
                         </div>
                       </div>
 
@@ -154,8 +162,8 @@ const TestResultsHistory = ({ userId }) => {
                         <div
                           className="progress-bar"
                           role="progressbar"
-                          style={{ width: `${result.score}%` }}
-                          aria-valuenow={result.score}
+                          style={{ width: `${Math.min(100, (result.total_score / 100) * 100)}%` }}
+                          aria-valuenow={result.total_score}
                           aria-valuemin="0"
                           aria-valuemax="100"
                         ></div>
@@ -163,8 +171,7 @@ const TestResultsHistory = ({ userId }) => {
 
                       <div className="stats-row mb-3">
                         <span className="stat-item">
-                          ✓ Вопросов ответено:{" "}
-                          <strong>{Object.keys(result.answers).length}</strong>
+                          Баллы: <strong>{result.total_score}</strong>
                         </span>
                       </div>
 
@@ -200,30 +207,20 @@ const TestResultsHistory = ({ userId }) => {
               <div className="text-center mb-4">
                 <div className="score-circle-large mx-auto mb-3">
                   <span className="score-value-large">
-                    {selectedResult.score}
+                    {selectedResult.total_score}
                   </span>
                 </div>
                 <p className="text-muted">
-                  {formatDate(selectedResult.timestamp)}
+                  {formatDate(selectedResult.created_at)}
                 </p>
-                {getScoreBadge(selectedResult.score)}
+                {getScoreBadge(selectedResult.total_score)}
               </div>
 
-              <h6 className="mb-3">Ваши ответы:</h6>
-              <div className="answers-list">
-                {Object.entries(selectedResult.answers).map(
-                  ([questionId, answer], index) => (
-                    <div
-                      key={questionId}
-                      className="answer-item p-3 border-bottom"
-                    >
-                      <p className="mb-2">
-                        <strong>Вопрос {index + 1}:</strong>
-                      </p>
-                      <p className="mb-0 text-primary">✓ {answer}</p>
-                    </div>
-                  ),
-                )}
+              <div className="text-center">
+                <h6 className="mb-3">Общий балл: {selectedResult.total_score}</h6>
+                <p className="text-muted">
+                  Тест пройден {formatDate(selectedResult.created_at)}
+                </p>
               </div>
             </div>
           )}
