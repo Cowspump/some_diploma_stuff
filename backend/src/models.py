@@ -33,11 +33,26 @@ class Journal(Base):
     owner = relationship("User", back_populates="journals")
 
 
+class Test(Base):
+    __tablename__ = "tests"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    therapist_id = Column(Integer, ForeignKey("users.id"))
+
+    questions = relationship("Question", back_populates="test", cascade="all, delete-orphan")
+    results = relationship("TestResult", back_populates="test")
+
+
 class Question(Base):
     __tablename__ = "questions"
     id = Column(Integer, primary_key=True)
     text = Column(String)
     options = Column(JSON)  # [{'text': 'Хорошо', 'points': 5}, ...]
+    test_id = Column(Integer, ForeignKey("tests.id"), nullable=True)
+
+    test = relationship("Test", back_populates="questions")
 
 
 class TestResult(Base):
@@ -46,7 +61,10 @@ class TestResult(Base):
     total_score = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"))
+    test_id = Column(Integer, ForeignKey("tests.id"), nullable=True)
+
     user = relationship("User", back_populates="test_results")
+    test = relationship("Test", back_populates="results")
 
 
 class AILog(Base):

@@ -1,16 +1,14 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
+import { useLanguage } from "../contexts/LanguageContext";
 import TestModal from "./TestModal";
 import "../styles/App.css";
 
 const TestSection = () => {
   const [showTestModal, setShowTestModal] = useState(false);
-  const { user, isAuthenticated } = useAuth();
-
-  const handleStartTest = () => {
-    setShowTestModal(true);
-  };
+  const { user } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <section id="test" className="test-section py-5">
@@ -18,23 +16,16 @@ const TestSection = () => {
         <Row className="align-items-center">
           <Col lg={6} className="mb-4 mb-lg-0">
             <div className="fade-in-animation">
-              <h2 className="section-title mb-4">Well-Being Test</h2>
-              <p className="section-description mb-4">
-                Take our comprehensive well-being assessment to understand your
-                current mental health status. Get personalized insights based on
-                your answers.
-              </p>
+              <h2 className="section-title mb-4">{t("test_title")}</h2>
+              <p className="section-description mb-4">{t("test_desc")}</p>
               <ul className="test-benefits">
-                <li>✓ Quick and easy assessment</li>
-                <li>✓ Personalized insights</li>
-                <li>✓ Track progress over time</li>
-                <li>✓ Science-backed questions</li>
+                <li>✓ {t("test_benefit1")}</li>
+                <li>✓ {t("test_benefit2")}</li>
+                <li>✓ {t("test_benefit3")}</li>
+                <li>✓ {t("test_benefit4")}</li>
               </ul>
-              <Button
-                className="btn-primary-custom mt-4"
-                onClick={handleStartTest}
-              >
-                Start the Test →
+              <Button className="btn-primary-custom mt-4" onClick={() => setShowTestModal(true)}>
+                {t("test_start")}
               </Button>
             </div>
           </Col>
@@ -45,12 +36,7 @@ const TestSection = () => {
           </Col>
         </Row>
       </Container>
-
-      <TestModal
-        show={showTestModal}
-        onHide={() => setShowTestModal(false)}
-        userId={user?.id || "guest"}
-      />
+      <TestModal show={showTestModal} onHide={() => setShowTestModal(false)} userId={user?.id || "guest"} />
     </section>
   );
 };

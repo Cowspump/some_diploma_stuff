@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import NavbarComponent from "./components/Navbar";
 import AuthModal from "./components/AuthModal";
 import Hero from "./components/Hero";
@@ -26,13 +27,18 @@ function AppContent() {
   const { user, logout, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalTab, setAuthModalTab] = useState("login");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleLogout = () => {
     logout();
-    window.location.reload();
+    setRefreshKey((k) => k + 1);
   };
 
-  // Показываем индикатор загрузки пока проверяем сессию
+  const handleLoginSuccess = () => {
+    setShowAuthModal(false);
+    setRefreshKey((k) => k + 1);
+  };
+
   if (loading) {
     return (
       <div
@@ -40,13 +46,12 @@ function AppContent() {
         style={{ minHeight: "100vh" }}
       >
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Загрузка...</span>
+          <span className="visually-hidden">...</span>
         </div>
       </div>
     );
   }
 
-  // Если пользователь администратор или терапевт - переходим на их страницы
   if (user && user.role === "admin") {
     return (
       <Routes>
@@ -71,7 +76,6 @@ function AppContent() {
     );
   }
 
-  // Главная страница для рабочих и неавторизованных пользователей
   return (
     <div className="app">
       <NavbarComponent
@@ -91,20 +95,20 @@ function AppContent() {
         show={showAuthModal}
         handleClose={() => setShowAuthModal(false)}
         initialTab={authModalTab}
+        onLoginSuccess={handleLoginSuccess}
       />
       <Hero />
       <MaterialsSection />
-      {/* Показываем компоненты только для workers и неавторизованных */}
       {(!user || user.role === "worker") && (
         <>
-          <TestSection />
-          {user && <TestResultsHistory userId={user.id} />}
+          <TestSection key={`test-${refreshKey}`} />
+          {user && <TestResultsHistory key={`results-${refreshKey}`} userId={user.id} />}
           <AIAssistantSection />
-          <MoodJournal isLoggedIn={!!user} />
+          <MoodJournal key={`mood-${refreshKey}`} isLoggedIn={!!user} />
         </>
       )}
-      <BurnoutScale />
-      <AnalyticsSection />
+      <BurnoutScale key={`burnout-${refreshKey}`} />
+      <AnalyticsSection key={`analytics-${refreshKey}`} />
       <Footer />
     </div>
   );
@@ -113,9 +117,11 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </LanguageProvider>
     </Router>
   );
 }

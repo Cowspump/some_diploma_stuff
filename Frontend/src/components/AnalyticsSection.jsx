@@ -1,97 +1,94 @@
-import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import '../styles/App.css';
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Spinner } from "react-bootstrap";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useLanguage } from "../contexts/LanguageContext";
+import { apiService } from "../services/api";
+import "../styles/App.css";
 
 const AnalyticsSection = () => {
-  const wellBeingData = [
-    { week: 'Week 1', score: 65 },
-    { week: 'Week 2', score: 70 },
-    { week: 'Week 3', score: 68 },
-    { week: 'Week 4', score: 75 },
-    { week: 'Week 5', score: 78 },
-    { week: 'Week 6', score: 82 },
-  ];
+  const { t } = useLanguage();
+  const [testData, setTestData] = useState([]);
+  const [moodData, setMoodData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const satisfactionData = [
-    { day: 'Mon', satisfaction: 7 },
-    { day: 'Tue', satisfaction: 6 },
-    { day: 'Wed', satisfaction: 8 },
-    { day: 'Thu', satisfaction: 7 },
-    { day: 'Fri', satisfaction: 9 },
-    { day: 'Sat', satisfaction: 8 },
-    { day: 'Sun', satisfaction: 8 },
-  ];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) loadData();
+    else setLoading(false);
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [testRes, journalRes] = await Promise.all([
+        apiService.get("/test/results").catch(() => ({ results: [] })),
+        apiService.get("/journal").catch(() => ({ journals: [] })),
+      ]);
+      setTestData(
+        (testRes.results || [])
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+          .map((r) => ({ name: new Date(r.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }), score: r.total_score }))
+      );
+      setMoodData(
+        (journalRes.journals || [])
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+          .map((j) => ({ day: new Date(j.created_at).toLocaleDateString("ru-RU", { weekday: "short" }), mood: j.wellbeing_score }))
+      );
+    } catch (err) {
+      console.error("Analytics load error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <section id="analytics" className="analytics-section py-5"><Container className="text-center"><Spinner animation="border" /></Container></section>;
+  }
+
+  const noData = testData.length === 0 && moodData.length === 0;
 
   return (
     <section id="analytics" className="analytics-section py-5">
       <Container>
-        <h2 className="section-title text-center mb-5">Your Analytics</h2>
-
-        <Row className="g-4">
-          <Col lg={6} className="fade-in-animation">
-            <div className="analytics-card p-4">
-              <h5 className="mb-4">Well-Being Test Results (Last 6 Weeks)</h5>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={wellBeingData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="week" stroke="#999" />
-                  <YAxis stroke="#999" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="#6366f1"
-                    strokeWidth={3}
-                    dot={{ fill: '#6366f1', r: 5 }}
-                    activeDot={{ r: 7 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Col>
-
-          <Col lg={6} className="fade-in-animation">
-            <div className="analytics-card p-4">
-              <h5 className="mb-4">Life Satisfaction by Day</h5>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={satisfactionData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="day" stroke="#999" />
-                  <YAxis stroke="#999" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Bar
-                    dataKey="satisfaction"
-                    fill="#8b5cf6"
-                    radius={[8, 8, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Col>
-        </Row>
+        <h2 className="section-title text-center mb-5">{t("analytics_title")}</h2>
+        {noData ? (
+          <p className="text-center text-muted">{t("analytics_no_data")}</p>
+        ) : (
+          <Row className="g-4">
+            <Col lg={6} className="fade-in-animation">
+              <div className="analytics-card p-4">
+                <h5 className="mb-4">{t("analytics_tests")}</h5>
+                {testData.length === 0 ? <p className="text-muted">{t("analytics_no_tests")}</p> : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={testData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="name" stroke="#999" />
+                      <YAxis stroke="#999" />
+                      <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }} />
+                      <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={3} dot={{ fill: "#6366f1", r: 5 }} activeDot={{ r: 7 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </Col>
+            <Col lg={6} className="fade-in-animation">
+              <div className="analytics-card p-4">
+                <h5 className="mb-4">{t("analytics_mood")}</h5>
+                {moodData.length === 0 ? <p className="text-muted">{t("analytics_no_mood")}</p> : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={moodData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="day" stroke="#999" />
+                      <YAxis stroke="#999" domain={[0, 5]} />
+                      <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }} />
+                      <Bar dataKey="mood" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </Col>
+          </Row>
+        )}
       </Container>
     </section>
   );

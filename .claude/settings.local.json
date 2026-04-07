@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/alikhan/PycharmProjects/december_mental_health/Frontend/src -type f -not -path \"*/node_modules/*\" 2>/dev/null | sort)",
+      "Bash(cd /Users/alikhan/PycharmProjects/december_mental_health/Frontend && npm ls 2>&1 | head -30)",
+      "WebSearch"
+    ]
+  }
+}

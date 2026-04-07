@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -11,6 +11,7 @@ class OptionCreate(BaseModel):
 class QuestionCreate(BaseModel):
     text: str
     options: List[OptionCreate]
+    test_id: Optional[int] = None
 
 
 class OptionOut(BaseModel):
@@ -22,19 +23,44 @@ class QuestionOut(BaseModel):
     id: int
     text: str
     options: List[OptionOut]
+    test_id: Optional[int] = None
 
     class Config:
         from_attributes = True
 
 
+class TestCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+
+class TestOut(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    created_at: datetime
+    question_count: Optional[int] = 0
+
+    class Config:
+        from_attributes = True
+
+
+class TestsResponse(BaseModel):
+    message: str
+    tests: List[TestOut]
+
+
 class TestSubmit(BaseModel):
     answers: dict[int, int]  # {question_id: selected_option_index}
+    test_id: Optional[int] = None
 
 
 class TestResultOut(BaseModel):
     id: int
     total_score: int
     created_at: datetime
+    test_id: Optional[int] = None
+    test_title: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -72,10 +98,29 @@ class UserRegister(BaseModel):
     role: str
 
 
+class ChatMessage(BaseModel):
+    role: str  # "user" or "ai"
+    text: str
+
+
 class AIAsk(BaseModel):
     prompt: str
+    chat_history: Optional[List[ChatMessage]] = None
 
 
 class JournalCreate(BaseModel):
     score: int
     note: str = None
+
+
+class AISummaryOut(BaseModel):
+    id: int
+    summary_text: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ExplainQuestionRequest(BaseModel):
+    question_id: int

@@ -1,18 +1,45 @@
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from typing import Optional
+import os
 import models, auth, database
 import schemas
 from api import gpt_client
 
 models.Base.metadata.create_all(bind=database.engine)
 
+# Миграция: добавляем новые колонки в существующие таблицы
+from sqlalchemy import inspect, text
+
+with database.engine.connect() as conn:
+    inspector = inspect(database.engine)
+
+    # Добавляем test_id в questions если нет
+    if "questions" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("questions")]
+        if "test_id" not in columns:
+            conn.execute(text("ALTER TABLE questions ADD COLUMN test_id INTEGER REFERENCES tests(id)"))
+            conn.commit()
+
+    # Добавляем test_id в test_results если нет
+    if "test_results" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("test_results")]
+        if "test_id" not in columns:
+            conn.execute(text("ALTER TABLE test_results ADD COLUMN test_id INTEGER REFERENCES tests(id)"))
+            conn.commit()
+
 app = FastAPI(title="Psychology & AI System")
+
+origins = [
+    "http://localhost:5173",
+    os.getenv("FRONTEND_URL", "*")
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -108,20 +135,77 @@ def delete_journal(journal_id: int, user: models.User = Depends(auth.get_current
     return {"message": "Journal entry deleted"}
 
 
-# --- TESTING ---
+# --- TESTS (CRUD) ---
+@app.post("/test/create", tags=["testing"])
+def create_test(
+        data: schemas.TestCreate,
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    if user.role != models.UserRole.therapist:
+        raise HTTPException(status_code=403, detail="Только терапевты могут создавать тесты")
+
+    new_test = models.Test(title=data.title, description=data.description, therapist_id=user.id)
+    db.add(new_test)
+    db.commit()
+    db.refresh(new_test)
+    return {"message": "Тест создан", "test_id": new_test.id}
+
+
+@app.get("/tests", tags=["testing"])
+def get_tests(
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    tests = db.query(models.Test).order_by(models.Test.created_at.desc()).all()
+    result = []
+    for t in tests:
+        result.append({
+            "id": t.id,
+            "title": t.title,
+            "description": t.description,
+            "created_at": t.created_at,
+            "question_count": len(t.questions)
+        })
+    return {"message": "Tests fetched", "tests": result}
+
+
+@app.delete("/test/{test_id}", tags=["testing"])
+def delete_test(
+        test_id: int,
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    if user.role != models.UserRole.therapist:
+        raise HTTPException(status_code=403, detail="Только терапевты могут удалять тесты")
+
+    test = db.query(models.Test).filter(models.Test.id == test_id).first()
+    if not test:
+        raise HTTPException(status_code=404, detail="Тест не найден")
+
+    db.delete(test)
+    db.commit()
+    return {"message": "Тест удалён"}
+
+
+# --- QUESTIONS ---
 @app.post("/test/add-question", tags=["testing"])
 def add_question(
-        q_data: schemas.QuestionCreate,  # Используем схему
+        q_data: schemas.QuestionCreate,
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
     if user.role != models.UserRole.therapist:
         raise HTTPException(status_code=403, detail="Только терапевты могут добавлять вопросы")
 
-    # Превращаем Pydantic-модели в обычные словари для базы данных
+    if q_data.test_id:
+        test = db.query(models.Test).filter(models.Test.id == q_data.test_id).first()
+        if not test:
+            raise HTTPException(status_code=404, detail="Тест не найден")
+
     options_json = [opt.model_dump() for opt in q_data.options]
 
-    new_q = models.Question(text=q_data.text, options=options_json)
+    new_q = models.Question(text=q_data.text, options=options_json, test_id=q_data.test_id)
     db.add(new_q)
     db.commit()
     return {"message": "Вопрос успешно добавлен"}
@@ -129,11 +213,14 @@ def add_question(
 
 @app.get("/test/questions", response_model=schemas.QuestionsResponse, tags=["testing"])
 def get_questions(
+        test_id: Optional[int] = Query(None),
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
-    # Вопросы могут видеть и workers (для прохождения тестов) и therapists (для управления)
-    questions = db.query(models.Question).all()
+    query = db.query(models.Question)
+    if test_id is not None:
+        query = query.filter(models.Question.test_id == test_id)
+    questions = query.all()
     return {"message": "Questions fetched", "questions": questions}
 
 
@@ -172,7 +259,7 @@ def submit_test(data: schemas.TestSubmit, user: models.User = Depends(auth.get_c
 
         total_score += question.options[option_index]["points"]
 
-    result = models.TestResult(total_score=total_score, user_id=user.id)
+    result = models.TestResult(total_score=total_score, user_id=user.id, test_id=data.test_id)
     db.add(result)
     db.commit()
 
@@ -195,24 +282,79 @@ def get_my_test_results(
         .order_by(models.TestResult.created_at.desc())
         .all()
     )
-    return {"message": "Results fetched", "results": results}
+
+    result_list = []
+    for r in results:
+        test_title = None
+        if r.test_id:
+            test = db.query(models.Test).filter(models.Test.id == r.test_id).first()
+            if test:
+                test_title = test.title
+        result_list.append({
+            "id": r.id,
+            "total_score": r.total_score,
+            "created_at": r.created_at,
+            "test_id": r.test_id,
+            "test_title": test_title
+        })
+
+    return {"message": "Results fetched", "results": result_list}
 
 
 # --- AI ASSISTANT ---
 @app.post("/ai/ask", tags=["ai"])
 async def ai_ask(data: schemas.AIAsk, user: models.User = Depends(auth.get_current_user),
                  db: Session = Depends(database.get_db)):
-    # Вызываем AI-ассистента через gpt_client
-    result = gpt_client.ask_ai_assistant(user.id, data.prompt, db)
+    history = [{"role": m.role, "text": m.text} for m in (data.chat_history or [])]
+    result = gpt_client.ask_ai_assistant(user.id, data.prompt, db, chat_history=history)
 
     if not result["success"]:
         raise HTTPException(status_code=500, detail=f"AI service error: {result['error']}")
 
     ai_reply = result["response"]
 
-    # Логируем запрос и ответ
     log = models.AILog(user_id=user.id, request=data.prompt, response=ai_reply)
     db.add(log)
     db.commit()
 
     return {"response": ai_reply}
+
+
+@app.get("/ai/summary", tags=["ai"])
+def get_ai_summary(
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    summary = (
+        db.query(models.AISummary)
+        .filter(models.AISummary.user_id == user.id)
+        .order_by(models.AISummary.created_at.desc())
+        .first()
+    )
+    if not summary:
+        return {"summary": None}
+    return {
+        "summary": {
+            "id": summary.id,
+            "summary_text": summary.summary_text,
+            "created_at": summary.created_at
+        }
+    }
+
+
+@app.post("/ai/explain-question", tags=["ai"])
+def explain_question(
+        data: schemas.ExplainQuestionRequest,
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    question = db.query(models.Question).filter(models.Question.id == data.question_id).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="Вопрос не найден")
+
+    result = gpt_client.explain_question(question.text, question.options)
+
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=f"AI service error: {result['error']}")
+
+    return {"explanation": result["explanation"]}

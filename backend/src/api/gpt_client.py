@@ -3,7 +3,6 @@ import logging
 import os
 from sqlalchemy.orm import Session
 
-# Добавляем родительскую директорию в path, чтобы импортировать models и database
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,14 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_user_summary(user_id: int, db: Session) -> dict:
-    """
-    Генерирует AI-саммари на основе журналов и тестов пользователя.
-
-    Returns:
-        dict: {"success": bool, "error": str | None}
-    """
     try:
-        # Получаем данные
         journals = (
             db.query(models.Journal)
             .filter(models.Journal.user_id == user_id)
@@ -44,12 +36,10 @@ def generate_user_summary(user_id: int, db: Session) -> dict:
             .all()
         )
 
-        # Валидация: проверяем, что есть хотя бы какие-то данные
         if not journals and not tests:
             logger.info(f"No data available for user {user_id}, skipping summary generation")
             return {"success": False, "error": "No data available"}
 
-        # Формируем текст для AI
         journal_text = "\n".join(
             [f"- {j.created_at.date()}: {j.note_text} (score: {j.wellbeing_score})"
              for j in journals if j.note_text]
@@ -76,7 +66,6 @@ def generate_user_summary(user_id: int, db: Session) -> dict:
         - краткий совет
         """
 
-        # Правильный вызов OpenAI API
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -89,20 +78,14 @@ def generate_user_summary(user_id: int, db: Session) -> dict:
 
         result = response.choices[0].message.content
 
-        # Валидация результата
         if not result or len(result.strip()) < 10:
             logger.error(f"GPT returned empty or too short response for user {user_id}")
             return {"success": False, "error": "Invalid GPT response"}
 
         if len(result) > 2000:
-            logger.warning(f"GPT response too long for user {user_id}, truncating")
             result = result[:2000]
 
-        # Сохраняем в БД
-        summary = models.AISummary(
-            user_id=user_id,
-            summary_text=result
-        )
+        summary = models.AISummary(user_id=user_id, summary_text=result)
         db.add(summary)
         db.commit()
 
@@ -115,46 +98,115 @@ def generate_user_summary(user_id: int, db: Session) -> dict:
         return {"success": False, "error": str(e)}
 
 
-def ask_ai_assistant(user_id: int, prompt: str, db: Session) -> dict:
-    """
-    Отправляет вопрос пользователя AI-ассистенту с контекстом о состоянии пользователя.
+def _build_user_context(user_id: int, db: Session) -> str:
+    """Build full context about the user from all available data."""
+    parts = []
 
-    Returns:
-        dict: {"success": bool, "response": str | None, "error": str | None}
-    """
+    # User info
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user:
+        parts.append(f"Имя работника: {user.full_name}")
+
+    # Latest AI summary
+    last_summary = (
+        db.query(models.AISummary)
+        .filter(models.AISummary.user_id == user_id)
+        .order_by(models.AISummary.created_at.desc())
+        .first()
+    )
+    if last_summary:
+        parts.append(f"Последняя аналитика:\n{last_summary.summary_text}")
+
+    # Recent journals
+    journals = (
+        db.query(models.Journal)
+        .filter(models.Journal.user_id == user_id)
+        .order_by(models.Journal.created_at.desc())
+        .limit(5)
+        .all()
+    )
+    if journals:
+        j_text = "\n".join([
+            f"  - {j.created_at.strftime('%d.%m.%Y')}: настроение {j.wellbeing_score}/5"
+            + (f", запись: \"{j.note_text[:100]}\"" if j.note_text else "")
+            for j in journals
+        ])
+        parts.append(f"Последние записи журнала:\n{j_text}")
+
+    # Recent test results
+    tests = (
+        db.query(models.TestResult)
+        .filter(models.TestResult.user_id == user_id)
+        .order_by(models.TestResult.created_at.desc())
+        .limit(5)
+        .all()
+    )
+    if tests:
+        t_text = "\n".join([
+            f"  - {t.created_at.strftime('%d.%m.%Y')}: {t.total_score} баллов"
+            for t in tests
+        ])
+        parts.append(f"Последние результаты тестов:\n{t_text}")
+
+    return "\n\n".join(parts) if parts else "Нет данных о пользователе."
+
+
+def ask_ai_assistant(user_id: int, prompt: str, db: Session, chat_history: list = None) -> dict:
     try:
-        # Получаем последний summary пользователя для контекста
-        last_summary = (
-            db.query(models.AISummary)
-            .filter(models.AISummary.user_id == user_id)
-            .order_by(models.AISummary.created_at.desc())
-            .first()
-        )
+        user_context = _build_user_context(user_id, db)
 
-        # Формируем системный промпт с контекстом
-        system_prompt = """Ты профессиональный психологический ассистент.
+        system_prompt = f"""Ты профессиональный психологический ассистент.
 Твоя задача - помогать пользователям с их психологическим состоянием, давать советы и поддержку.
-Отвечай на русском языке, будь эмпатичным и профессиональным."""
+Ты помнишь весь разговор с пользователем и знаешь всё о его состоянии.
+Отвечай на том языке, на котором пишет пользователь. Будь эмпатичным и профессиональным.
 
-        if last_summary:
-            system_prompt += f"\n\nКонтекст о пользователе:\n{last_summary.summary_text}"
+=== Полная информация о работнике ===
+{user_context}
+=== Конец информации ==="""
 
-        # Вызываем OpenAI API
+        # Build messages with full chat history
+        messages = [{"role": "system", "content": system_prompt}]
+
+        # Add previous chat history from this session
+        if chat_history:
+            for msg in chat_history[-20:]:  # last 20 messages to stay within token limits
+                role = "user" if msg.get("role") == "user" else "assistant"
+                messages.append({"role": role, "text": msg.get("text", "")})
+
+        # Also load recent AI logs as fallback context (previous sessions)
+        if not chat_history:
+            recent_logs = (
+                db.query(models.AILog)
+                .filter(models.AILog.user_id == user_id)
+                .order_by(models.AILog.created_at.desc())
+                .limit(6)
+                .all()
+            )
+            for log in reversed(recent_logs):
+                messages.append({"role": "user", "content": log.request})
+                messages.append({"role": "assistant", "content": log.response})
+
+        # Fix: ensure all messages use "content" key
+        fixed_messages = []
+        for m in messages:
+            if "text" in m and "content" not in m:
+                fixed_messages.append({"role": m["role"], "content": m["text"]})
+            else:
+                fixed_messages.append(m)
+
+        # Add current prompt
+        fixed_messages.append({"role": "user", "content": prompt})
+
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ],
+            messages=fixed_messages,
             max_tokens=800,
             temperature=0.8
         )
 
         ai_reply = response.choices[0].message.content
 
-        # Валидация ответа
         if not ai_reply or len(ai_reply.strip()) < 5:
-            logger.error(f"GPT returned empty or too short response for user {user_id}")
             return {"success": False, "response": None, "error": "Invalid GPT response"}
 
         logger.info(f"AI assistant responded to user {user_id}")
@@ -163,3 +215,41 @@ def ask_ai_assistant(user_id: int, prompt: str, db: Session) -> dict:
     except Exception as e:
         logger.error(f"AI assistant error for user {user_id}: {e}", exc_info=True)
         return {"success": False, "response": None, "error": str(e)}
+
+
+def explain_question(question_text: str, options: list) -> dict:
+    try:
+        options_text = "\n".join([f"- {opt['text']} ({opt['points']} баллов)" for opt in options])
+
+        prompt = f"""Объясни этот психологический вопрос простым языком.
+
+Вопрос: {question_text}
+
+Варианты ответов:
+{options_text}
+
+Дай краткое объяснение (3-5 предложений):
+- Что оценивает этот вопрос
+- Как понимать варианты ответов
+- Совет по честному ответу"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Ты психологический консультант. Помогаешь пользователям понять вопросы психологических тестов. Отвечай кратко и на русском языке."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=400,
+            temperature=0.7
+        )
+
+        result = response.choices[0].message.content
+
+        if not result or len(result.strip()) < 10:
+            return {"success": False, "explanation": None, "error": "Invalid GPT response"}
+
+        return {"success": True, "explanation": result, "error": None}
+
+    except Exception as e:
+        logger.error(f"AI explain question error: {e}", exc_info=True)
+        return {"success": False, "explanation": None, "error": str(e)}
