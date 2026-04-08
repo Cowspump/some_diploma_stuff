@@ -217,26 +217,32 @@ def ask_ai_assistant(user_id: int, prompt: str, db: Session, chat_history: list 
         return {"success": False, "response": None, "error": str(e)}
 
 
-def explain_question(question_text: str, options: list) -> dict:
+def explain_question(question_text: str, options: list, lang: str = "ru") -> dict:
     try:
-        options_text = "\n".join([f"- {opt['text']} ({opt['points']} баллов)" for opt in options])
+        options_text = "\n".join([f"- {opt['text']} ({opt['points']} points)" for opt in options])
 
-        prompt = f"""Объясни этот психологический вопрос простым языком.
+        lang_instructions = {
+            "ru": "Отвечай на русском языке.",
+            "zh": "请用中文回答。",
+        }
+        lang_instruction = lang_instructions.get(lang, "Отвечай на русском языке.")
 
-Вопрос: {question_text}
+        prompt = f"""Explain this psychological question in simple terms.
 
-Варианты ответов:
+Question: {question_text}
+
+Answer options:
 {options_text}
 
-Дай краткое объяснение (3-5 предложений):
-- Что оценивает этот вопрос
-- Как понимать варианты ответов
-- Совет по честному ответу"""
+Give a brief explanation (3-5 sentences):
+- What this question evaluates
+- How to understand the answer options
+- Advice for honest answering"""
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "Ты психологический консультант. Помогаешь пользователям понять вопросы психологических тестов. Отвечай кратко и на русском языке."},
+                {"role": "system", "content": f"You are a psychological consultant. You help users understand psychological test questions. {lang_instruction}"},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=400,
@@ -253,3 +259,64 @@ def explain_question(question_text: str, options: list) -> dict:
     except Exception as e:
         logger.error(f"AI explain question error: {e}", exc_info=True)
         return {"success": False, "explanation": None, "error": str(e)}
+
+
+def translate_text(text: str, target_lang: str) -> dict:
+    try:
+        lang_names = {"zh": "Chinese", "en": "English", "kk": "Kazakh"}
+        lang_name = lang_names.get(target_lang, target_lang)
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"Translate the following text to {lang_name}. Return only the translation, nothing else."},
+                {"role": "user", "content": text}
+            ],
+            max_tokens=200,
+            temperature=0.3
+        )
+        result = response.choices[0].message.content.strip()
+        return {"success": True, "text": result}
+    except Exception as e:
+        logger.error(f"AI translate text error: {e}", exc_info=True)
+        return {"success": False, "text": None, "error": str(e)}
+
+
+def translate_question(question_text: str, options: list, target_lang: str) -> dict:
+    try:
+        options_text = "\n".join([f'- "{opt["text"]}" ({opt["points"]} points)' for opt in options])
+
+        lang_names = {"zh": "Chinese", "en": "English", "kk": "Kazakh"}
+        lang_name = lang_names.get(target_lang, target_lang)
+
+        prompt = f"""Translate the following psychological test question and its answer options to {lang_name}.
+Keep the meaning exactly the same. Return ONLY valid JSON with this format:
+{{"text": "translated question", "options": [{{"text": "translated option", "points": N}}, ...]}}
+
+Question: {question_text}
+
+Options:
+{options_text}"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"You are a professional translator. Translate to {lang_name}. Return only valid JSON, no markdown."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            temperature=0.3
+        )
+
+        import json
+        result_text = response.choices[0].message.content.strip()
+        # Strip markdown code fences if present
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+        parsed = json.loads(result_text)
+
+        return {"success": True, "text": parsed["text"], "options": parsed["options"]}
+
+    except Exception as e:
+        logger.error(f"AI translate question error: {e}", exc_info=True)
+        return {"success": False, "text": None, "options": None, "error": str(e)}

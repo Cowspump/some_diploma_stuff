@@ -52,6 +52,26 @@ class AuthService {
     return await response.json();
   }
 
+  async resetPassword(email, newPassword) {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        new_password: newPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Password reset failed");
+    }
+
+    return await response.json();
+  }
+
   async getCurrentUser() {
     return await apiService.get("/auth/me");
   }

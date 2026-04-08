@@ -7,7 +7,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import "../styles/TestModal.css";
 
 const TestModal = ({ show, onHide, userId }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [tests, setTests] = useState([]);
   const [selectedTest, setSelectedTest] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -39,7 +39,7 @@ const TestModal = ({ show, onHide, userId }) => {
     setLoading(true);
     setError("");
     try {
-      const data = await getTests();
+      const data = await getTests(lang);
       setTests(data);
     } catch (err) {
       setError(t("test_load_error"));
@@ -53,7 +53,7 @@ const TestModal = ({ show, onHide, userId }) => {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchTestQuestions(test.id);
+      const data = await fetchTestQuestions(test.id, lang);
       if (data.length === 0) {
         setError(t("test_no_questions"));
         setQuestions([]);
@@ -107,7 +107,7 @@ const TestModal = ({ show, onHide, userId }) => {
   const handleExplainOne = async (questionId) => {
     setExplainLoadingId(questionId);
     try {
-      const res = await explainQuestion(questionId);
+      const res = await explainQuestion(questionId, lang);
       setExplanations((prev) => ({ ...prev, [questionId]: res.explanation }));
     } catch (err) {
       setExplanations((prev) => ({ ...prev, [questionId]: "Ошибка при запросе объяснения." }));

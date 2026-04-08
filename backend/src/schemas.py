@@ -124,3 +124,28 @@ class AISummaryOut(BaseModel):
 
 class ExplainQuestionRequest(BaseModel):
     question_id: int
+    lang: Optional[str] = "ru"
+
+
+class PasswordResetRequest(BaseModel):
+    email: str
+    new_password: str
+
+
+class UserOut(BaseModel):
+    id: int
+    full_name: str
+    mail: str
+    role: str
+
+    class Config:
+        from_attributes = True
+
+
+class UserWithResults(BaseModel):
+    id: int
+    full_name: str
+    mail: str
+    test_results: List[TestResultOut]
+    journals_count: int
+    avg_score: Optional[float] = None

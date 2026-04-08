@@ -1,11 +1,11 @@
 .modal-content {
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
     border: none;
 }
@@ -16,24 +16,24 @@
 
 .form-check {
     padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
     margin-bottom: 12px !important;
     transition: all 0.3s ease;
 }
 
 .form-check:hover {
-    border-color: #667eea;
-    background-color: #f8f9ff;
+    border-color: #6366f1;
+    background-color: #eef2ff;
 }
 
 .form-check input:checked ~ .form-check-label {
-    color: #667eea;
+    color: #6366f1;
     font-weight: 500;
 }
 
 .progress {
     height: 8px;
     border-radius: 10px;
-    background-color: #e0e0e0;
+    background-color: #e5e7eb;
 }

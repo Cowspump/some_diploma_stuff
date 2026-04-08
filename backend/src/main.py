@@ -7,8 +7,13 @@ import os
 import models, auth, database
 import schemas
 from api import gpt_client
+from seed_data import seed_database
 
 models.Base.metadata.create_all(bind=database.engine)
+
+# Auto-seed test data if DB is empty
+with database.SessionLocal() as db:
+    seed_database(db)
 
 # Миграция: добавляем новые колонки в существующие таблицы
 from sqlalchemy import inspect, text
@@ -73,6 +78,18 @@ def get_current_user_info(user: models.User = Depends(auth.get_current_user)):
         "fullName": user.full_name,
         "id": user.id
     }
+
+
+@app.post("/auth/reset-password", tags=["auth"])
+def reset_password(data: schemas.PasswordResetRequest, db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.mail == data.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if len(data.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    user.hashed_password = auth.get_password_hash(data.new_password)
+    db.commit()
+    return {"message": "Password updated successfully"}
 
 
 @app.post("/register", tags=["auth"])
@@ -154,16 +171,43 @@ def create_test(
 
 @app.get("/tests", tags=["testing"])
 def get_tests(
+        lang: Optional[str] = Query(None),
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
     tests = db.query(models.Test).order_by(models.Test.created_at.desc()).all()
     result = []
     for t in tests:
+        title = t.title
+        description = t.description
+
+        if lang and lang != "ru":
+            cached = db.query(models.TestTranslation).filter(
+                models.TestTranslation.test_id == t.id,
+                models.TestTranslation.lang == lang
+            ).first()
+
+            if cached:
+                title = cached.translated_title
+                description = cached.translated_description
+            else:
+                title_res = gpt_client.translate_text(t.title, lang)
+                desc_res = gpt_client.translate_text(t.description, lang) if t.description else {"success": True, "text": None}
+                if title_res["success"]:
+                    title = title_res["text"]
+                    description = desc_res.get("text") if desc_res["success"] else t.description
+                    cache_entry = models.TestTranslation(
+                        test_id=t.id, lang=lang,
+                        translated_title=title,
+                        translated_description=description
+                    )
+                    db.add(cache_entry)
+                    db.commit()
+
         result.append({
             "id": t.id,
-            "title": t.title,
-            "description": t.description,
+            "title": title,
+            "description": description,
             "created_at": t.created_at,
             "question_count": len(t.questions)
         })
@@ -214,6 +258,7 @@ def add_question(
 @app.get("/test/questions", response_model=schemas.QuestionsResponse, tags=["testing"])
 def get_questions(
         test_id: Optional[int] = Query(None),
+        lang: Optional[str] = Query(None),
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
@@ -221,6 +266,39 @@ def get_questions(
     if test_id is not None:
         query = query.filter(models.Question.test_id == test_id)
     questions = query.all()
+
+    if lang and lang != "ru":
+        translated = []
+        for q in questions:
+            # Check cache
+            cached = db.query(models.QuestionTranslation).filter(
+                models.QuestionTranslation.question_id == q.id,
+                models.QuestionTranslation.lang == lang
+            ).first()
+
+            if cached:
+                translated.append(schemas.QuestionOut(
+                    id=q.id, text=cached.translated_text,
+                    options=cached.translated_options, test_id=q.test_id
+                ))
+            else:
+                result = gpt_client.translate_question(q.text, q.options, lang)
+                if result["success"]:
+                    cache_entry = models.QuestionTranslation(
+                        question_id=q.id, lang=lang,
+                        translated_text=result["text"],
+                        translated_options=result["options"]
+                    )
+                    db.add(cache_entry)
+                    db.commit()
+                    translated.append(schemas.QuestionOut(
+                        id=q.id, text=result["text"],
+                        options=result["options"], test_id=q.test_id
+                    ))
+                else:
+                    translated.append(q)
+        return {"message": "Questions fetched", "questions": translated}
+
     return {"message": "Questions fetched", "questions": questions}
 
 
@@ -301,6 +379,57 @@ def get_my_test_results(
     return {"message": "Results fetched", "results": result_list}
 
 
+# --- THERAPIST: VIEW WORKERS ---
+@app.get("/therapist/workers", tags=["therapist"])
+def get_workers(
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    if user.role != models.UserRole.therapist:
+        raise HTTPException(status_code=403, detail="Only therapists can view workers")
+
+    workers = db.query(models.User).filter(models.User.role == models.UserRole.worker).all()
+    result = []
+    for w in workers:
+        test_results = (
+            db.query(models.TestResult)
+            .filter(models.TestResult.user_id == w.id)
+            .order_by(models.TestResult.created_at.desc())
+            .all()
+        )
+        journals_count = db.query(models.Journal).filter(models.Journal.user_id == w.id).count()
+
+        result_list = []
+        total_score = 0
+        for r in test_results:
+            test_title = None
+            if r.test_id:
+                test = db.query(models.Test).filter(models.Test.id == r.test_id).first()
+                if test:
+                    test_title = test.title
+            result_list.append({
+                "id": r.id,
+                "total_score": r.total_score,
+                "created_at": r.created_at,
+                "test_id": r.test_id,
+                "test_title": test_title
+            })
+            total_score += r.total_score
+
+        avg_score = round(total_score / len(test_results), 1) if test_results else None
+
+        result.append({
+            "id": w.id,
+            "full_name": w.full_name,
+            "mail": w.mail,
+            "test_results": result_list,
+            "journals_count": journals_count,
+            "avg_score": avg_score
+        })
+
+    return {"workers": result}
+
+
 # --- AI ASSISTANT ---
 @app.post("/ai/ask", tags=["ai"])
 async def ai_ask(data: schemas.AIAsk, user: models.User = Depends(auth.get_current_user),
@@ -352,7 +481,7 @@ def explain_question(
     if not question:
         raise HTTPException(status_code=404, detail="Вопрос не найден")
 
-    result = gpt_client.explain_question(question.text, question.options)
+    result = gpt_client.explain_question(question.text, question.options, lang=data.lang)
 
     if not result["success"]:
         raise HTTPException(status_code=500, detail=f"AI service error: {result['error']}")

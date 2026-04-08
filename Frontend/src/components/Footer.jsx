@@ -1,5 +1,6 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
+import { motion } from "framer-motion";
 import { useLanguage } from "../contexts/LanguageContext";
 import "../styles/App.css";
 
@@ -8,7 +9,13 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="footer-section py-5 mt-5">
+    <motion.footer
+      className="footer-section py-5 mt-5"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+    >
       <Container>
         <Row className="g-4 mb-5">
           <Col md={6} lg={3}>
@@ -51,7 +58,7 @@ const Footer = () => {
           </Col>
         </Row>
       </Container>
-    </footer>
+    </motion.footer>
   );
 };
 

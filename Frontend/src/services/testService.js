@@ -6,8 +6,12 @@ export const createTest = async (testData) => {
   return response;
 };
 
-export const getTests = async () => {
-  const response = await apiService.get('/tests');
+export const getTests = async (lang = "ru") => {
+  let endpoint = '/tests';
+  if (lang && lang !== "ru") {
+    endpoint += `?lang=${lang}`;
+  }
+  const response = await apiService.get(endpoint);
   return response.tests || [];
 };
 
@@ -17,8 +21,11 @@ export const deleteTest = async (testId) => {
 };
 
 // --- Вопросы ---
-export const fetchTestQuestions = async (testId) => {
-  const endpoint = testId ? `/test/questions?test_id=${testId}` : '/test/questions';
+export const fetchTestQuestions = async (testId, lang = "ru") => {
+  let endpoint = testId ? `/test/questions?test_id=${testId}` : '/test/questions';
+  if (lang && lang !== "ru") {
+    endpoint += (endpoint.includes('?') ? '&' : '?') + `lang=${lang}`;
+  }
   const response = await apiService.get(endpoint);
   return response.questions || [];
 };
@@ -46,7 +53,7 @@ export const deleteQuestion = async (questionId) => {
 };
 
 // --- AI объяснение вопроса ---
-export const explainQuestion = async (questionId) => {
-  const response = await apiService.post('/ai/explain-question', { question_id: questionId });
+export const explainQuestion = async (questionId, lang = "ru") => {
+  const response = await apiService.post('/ai/explain-question', { question_id: questionId, lang });
   return response;
 };

@@ -178,6 +178,16 @@ const translations = {
     auth_err_password_length: "Пароль должен быть не менее 8 символов",
     auth_err_login: "Ошибка входа. Проверьте почту и пароль.",
     auth_err_signup: "Ошибка регистрации. Попробуйте позже.",
+    auth_forgot_password: "Забыли пароль?",
+    auth_reset_title: "Восстановление пароля",
+    auth_reset_desc: "Введите вашу почту и новый пароль для восстановления доступа.",
+    auth_new_password: "Новый пароль",
+    auth_new_password_placeholder: "Введите новый пароль",
+    auth_reset_btn: "Сменить пароль",
+    auth_resetting: "Сохранение...",
+    auth_reset_success: "Пароль успешно изменён! Теперь вы можете войти.",
+    auth_reset_error: "Ошибка восстановления пароля.",
+    auth_back_to_login: "Назад к входу",
 
     // Therapist Dashboard
     therapist_title: "WellBeing - Панель терапевта",
@@ -228,6 +238,21 @@ const translations = {
     therapist_scoring_mid: "Средние баллы (2-3) — нейтральные ответы, умеренное состояние",
     therapist_scoring_low: "Низкие баллы (0-1) — негативные ответы, требуют внимания",
     therapist_scoring_tip: "Совет: Используйте шкалу 0-5 для каждого варианта. Чем выше балл — тем лучше состояние работника.",
+
+    // Therapist - Users tab
+    therapist_tab_tests: "Тесты",
+    therapist_tab_users: "Пользователи",
+    therapist_users_title: "Пользователи",
+    therapist_users_count: "пользователей",
+    therapist_select_user: "Выберите пользователя слева",
+    therapist_select_user_desc: "чтобы посмотреть результаты тестов",
+    therapist_no_workers: "Нет зарегистрированных пользователей",
+    therapist_user_results: "Результаты тестов",
+    therapist_user_journals: "записей в журнале",
+    therapist_user_avg: "Средний балл",
+    therapist_user_tests_count: "тестов пройдено",
+    therapist_user_no_results: "Пользователь пока не проходил тесты",
+    therapist_users_load_error: "Ошибка загрузки пользователей",
 
     // Language
     lang_label: "Язык",
@@ -411,6 +436,16 @@ const translations = {
     auth_err_password_length: "密码至少需要8个字符",
     auth_err_login: "登录错误。请检查邮箱和密码。",
     auth_err_signup: "注册错误。请稍后重试。",
+    auth_forgot_password: "忘记密码？",
+    auth_reset_title: "重置密码",
+    auth_reset_desc: "输入您的邮箱和新密码以恢复访问。",
+    auth_new_password: "新密码",
+    auth_new_password_placeholder: "输入新密码",
+    auth_reset_btn: "更改密码",
+    auth_resetting: "保存中...",
+    auth_reset_success: "密码已成功更改！现在您可以登录了。",
+    auth_reset_error: "密码重置错误。",
+    auth_back_to_login: "返回登录",
 
     // Therapist Dashboard
     therapist_title: "WellBeing - 治疗师面板",
@@ -461,6 +496,21 @@ const translations = {
     therapist_scoring_mid: "中分 (2-3) — 中性回答，一般状态",
     therapist_scoring_low: "低分 (0-1) — 消极回答，需要关注",
     therapist_scoring_tip: "提示：每个选项使用0-5分制。分数越高，员工状态越好。",
+
+    // Therapist - Users tab
+    therapist_tab_tests: "测试",
+    therapist_tab_users: "用户",
+    therapist_users_title: "用户",
+    therapist_users_count: "位用户",
+    therapist_select_user: "请在左侧选择用户",
+    therapist_select_user_desc: "查看测试结果",
+    therapist_no_workers: "没有注册用户",
+    therapist_user_results: "测试结果",
+    therapist_user_journals: "日志条目",
+    therapist_user_avg: "平均分",
+    therapist_user_tests_count: "已完成测试",
+    therapist_user_no_results: "用户尚未完成任何测试",
+    therapist_users_load_error: "加载用户失败",
 
     // Language
     lang_label: "语言",
