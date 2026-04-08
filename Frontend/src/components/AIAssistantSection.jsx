@@ -2,18 +2,30 @@ import React, { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 import AIChatModal from "./AIChatModal";
+import Modal from "react-bootstrap/Modal";
 import "../styles/App.css";
 
 const AIAssistantSection = () => {
   const [showChatModal, setShowChatModal] = useState(false);
+  const [showAuthRequired, setShowAuthRequired] = useState(false);
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   const features = [
     { badge: "ai_available", desc: "ai_available_desc" },
     { badge: "ai_smart", desc: "ai_smart_desc" },
     { badge: "ai_safe", desc: "ai_safe_desc" },
   ];
+
+  const handleOpen = () => {
+    if (!user) {
+      setShowAuthRequired(true);
+      return;
+    }
+    setShowChatModal(true);
+  };
 
   return (
     <>
@@ -46,7 +58,7 @@ const AIAssistantSection = () => {
                   ))}
                 </div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                  <Button className="btn-primary-custom mt-4" onClick={() => setShowChatModal(true)}>
+                  <Button className="btn-primary-custom mt-4" onClick={handleOpen}>
                     {t("ai_chat_now")}
                   </Button>
                 </motion.div>
@@ -67,6 +79,19 @@ const AIAssistantSection = () => {
         </Container>
       </section>
       <AIChatModal show={showChatModal} onHide={() => setShowChatModal(false)} />
+      <Modal show={showAuthRequired} onHide={() => setShowAuthRequired(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{t("auth_required")}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-0">{t("auth_required_desc")}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => setShowAuthRequired(false)}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

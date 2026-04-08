@@ -149,3 +149,22 @@ class UserWithResults(BaseModel):
     test_results: List[TestResultOut]
     journals_count: int
     avg_score: Optional[float] = None
+
+
+class MaterialCreate(BaseModel):
+    title: str
+    content: str
+
+
+class MaterialOut(BaseModel):
+    id: int
+    title: str
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class MaterialsResponse(BaseModel):
+    materials: List[MaterialOut]

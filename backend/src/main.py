@@ -80,6 +80,34 @@ def get_current_user_info(user: models.User = Depends(auth.get_current_user)):
     }
 
 
+# --- MATERIALS ---
+@app.get("/materials", response_model=schemas.MaterialsResponse, tags=["materials"])
+def list_materials(db: Session = Depends(database.get_db)):
+    materials = db.query(models.Material).order_by(models.Material.created_at.desc()).all()
+    return {"materials": materials}
+
+
+@app.post("/materials", tags=["materials"])
+def create_material(
+        data: schemas.MaterialCreate,
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    if user.role not in (models.UserRole.therapist, models.UserRole.admin):
+        raise HTTPException(status_code=403, detail="Only therapists/admin can add materials")
+
+    if not data.title.strip():
+        raise HTTPException(status_code=400, detail="Title is required")
+    if not data.content.strip():
+        raise HTTPException(status_code=400, detail="Content is required")
+
+    m = models.Material(title=data.title.strip(), content=data.content.strip(), author_id=user.id)
+    db.add(m)
+    db.commit()
+    db.refresh(m)
+    return {"message": "Material created", "material_id": m.id}
+
+
 @app.post("/auth/reset-password", tags=["auth"])
 def reset_password(data: schemas.PasswordResetRequest, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.mail == data.email).first()
@@ -186,23 +214,9 @@ def get_tests(
                 models.TestTranslation.test_id == t.id,
                 models.TestTranslation.lang == lang
             ).first()
-
             if cached:
                 title = cached.translated_title
                 description = cached.translated_description
-            else:
-                title_res = gpt_client.translate_text(t.title, lang)
-                desc_res = gpt_client.translate_text(t.description, lang) if t.description else {"success": True, "text": None}
-                if title_res["success"]:
-                    title = title_res["text"]
-                    description = desc_res.get("text") if desc_res["success"] else t.description
-                    cache_entry = models.TestTranslation(
-                        test_id=t.id, lang=lang,
-                        translated_title=title,
-                        translated_description=description
-                    )
-                    db.add(cache_entry)
-                    db.commit()
 
         result.append({
             "id": t.id,
@@ -270,33 +284,17 @@ def get_questions(
     if lang and lang != "ru":
         translated = []
         for q in questions:
-            # Check cache
             cached = db.query(models.QuestionTranslation).filter(
                 models.QuestionTranslation.question_id == q.id,
                 models.QuestionTranslation.lang == lang
             ).first()
-
             if cached:
                 translated.append(schemas.QuestionOut(
                     id=q.id, text=cached.translated_text,
                     options=cached.translated_options, test_id=q.test_id
                 ))
             else:
-                result = gpt_client.translate_question(q.text, q.options, lang)
-                if result["success"]:
-                    cache_entry = models.QuestionTranslation(
-                        question_id=q.id, lang=lang,
-                        translated_text=result["text"],
-                        translated_options=result["options"]
-                    )
-                    db.add(cache_entry)
-                    db.commit()
-                    translated.append(schemas.QuestionOut(
-                        id=q.id, text=result["text"],
-                        options=result["options"], test_id=q.test_id
-                    ))
-                else:
-                    translated.append(q)
+                translated.append(q)
         return {"message": "Questions fetched", "questions": translated}
 
     return {"message": "Questions fetched", "questions": questions}
@@ -397,7 +395,12 @@ def get_workers(
             .order_by(models.TestResult.created_at.desc())
             .all()
         )
-        journals_count = db.query(models.Journal).filter(models.Journal.user_id == w.id).count()
+        journals = (
+            db.query(models.Journal)
+            .filter(models.Journal.user_id == w.id)
+            .order_by(models.Journal.created_at.desc())
+            .all()
+        )
 
         result_list = []
         total_score = 0
@@ -418,16 +421,58 @@ def get_workers(
 
         avg_score = round(total_score / len(test_results), 1) if test_results else None
 
+        # Journal scores (without note text) for analytics
+        journal_scores = [
+            {"score": j.wellbeing_score, "date": j.created_at}
+            for j in journals
+        ]
+
+        # AI summary
+        ai_summary = (
+            db.query(models.AISummary)
+            .filter(models.AISummary.user_id == w.id)
+            .order_by(models.AISummary.created_at.desc())
+            .first()
+        )
+
         result.append({
             "id": w.id,
             "full_name": w.full_name,
             "mail": w.mail,
             "test_results": result_list,
-            "journals_count": journals_count,
-            "avg_score": avg_score
+            "journals_count": len(journals),
+            "avg_score": avg_score,
+            "journal_scores": journal_scores,
+            "ai_summary": ai_summary.summary_text if ai_summary else None,
         })
 
     return {"workers": result}
+
+
+@app.delete("/admin/user/{user_id}", tags=["admin"])
+def delete_user(
+        user_id: int,
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db)
+):
+    if user.role not in (models.UserRole.therapist, models.UserRole.admin):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    target = db.query(models.User).filter(models.User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if target.id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+
+    # Cascade delete user data
+    db.query(models.Journal).filter(models.Journal.user_id == user_id).delete()
+    db.query(models.TestResult).filter(models.TestResult.user_id == user_id).delete()
+    db.query(models.AILog).filter(models.AILog.user_id == user_id).delete()
+    db.query(models.AISummary).filter(models.AISummary.user_id == user_id).delete()
+    db.delete(target)
+    db.commit()
+    return {"message": "User deleted"}
 
 
 # --- AI ASSISTANT ---

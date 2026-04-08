@@ -34,11 +34,12 @@ const NavbarComponent = ({ onLoginClick, onSignUpClick, isLoggedIn, onLogoutClic
           <div className="d-flex gap-2 justify-content-center justify-content-lg-end flex-wrap align-items-center">
             <Dropdown>
               <Dropdown.Toggle variant="outline-secondary" size="sm">
-                {lang === "ru" ? "RU" : "中文"}
+                {lang === "ru" ? "RU" : lang === "en" ? "EN" : "中文"}
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 <Dropdown.Item onClick={() => switchLang("ru")}>Русский</Dropdown.Item>
                 <Dropdown.Item onClick={() => switchLang("zh")}>中文</Dropdown.Item>
+                <Dropdown.Item onClick={() => switchLang("en")}>English</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
             {!isLoggedIn ? (

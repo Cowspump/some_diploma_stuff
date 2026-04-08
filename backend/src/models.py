@@ -103,3 +103,13 @@ class TestTranslation(Base):
     lang = Column(String, nullable=False)
     translated_title = Column(String, nullable=False)
     translated_description = Column(String, nullable=True)
+
+
+class Material(Base):
+    __tablename__ = "materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=True)

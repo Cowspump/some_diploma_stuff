@@ -6,6 +6,11 @@ import "../styles/App.css";
 
 const Hero = () => {
   const { t } = useLanguage();
+  const heroTitle = t("hero_title");
+  const heroTitleLines =
+    heroTitle === "您的幸福之旅从这里开始"
+      ? ["您的幸福之旅", "从这里开始"]
+      : [heroTitle];
   return (
     <section className="hero-section py-5" id="hero">
       <img src="/images/hero-mental-health.jpg" alt="" className="hero-bg-image" />
@@ -18,7 +23,12 @@ const Hero = () => {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <h1 className="hero-title">
-                {t("hero_title")}
+                {heroTitleLines.map((line, idx) => (
+                  <React.Fragment key={idx}>
+                    {line}
+                    {idx < heroTitleLines.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
               </h1>
               <p className="hero-subtitle">{t("hero_subtitle")}</p>
               <div className="hero-decoration"></div>

@@ -4,12 +4,22 @@ import { motion } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import TestModal from "./TestModal";
+import Modal from "react-bootstrap/Modal";
 import "../styles/App.css";
 
 const TestSection = () => {
   const [showTestModal, setShowTestModal] = useState(false);
+  const [showAuthRequired, setShowAuthRequired] = useState(false);
   const { user } = useAuth();
   const { t } = useLanguage();
+
+  const handleOpen = () => {
+    if (!user) {
+      setShowAuthRequired(true);
+      return;
+    }
+    setShowTestModal(true);
+  };
 
   return (
     <section id="test" className="test-section py-5">
@@ -38,7 +48,7 @@ const TestSection = () => {
                 ))}
               </ul>
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                <Button className="btn-primary-custom mt-4" onClick={() => setShowTestModal(true)}>
+                <Button className="btn-primary-custom mt-4" onClick={handleOpen}>
                   {t("test_start")}
                 </Button>
               </motion.div>
@@ -57,7 +67,21 @@ const TestSection = () => {
           </Col>
         </Row>
       </Container>
-      <TestModal show={showTestModal} onHide={() => setShowTestModal(false)} userId={user?.id || "guest"} />
+      <TestModal show={showTestModal} onHide={() => setShowTestModal(false)} userId={user?.id} />
+
+      <Modal show={showAuthRequired} onHide={() => setShowAuthRequired(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{t("auth_required")}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-0">{t("auth_required_desc")}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => setShowAuthRequired(false)}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 };

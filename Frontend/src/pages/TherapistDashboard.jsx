@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { addQuestion, deleteQuestion, fetchTestQuestions, createTest, getTests, deleteTest } from "../services/testService";
 import { apiService } from "../services/api";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import "../styles/Dashboard.css";
 
 const TherapistDashboard = ({ user, onLogout }) => {
@@ -57,6 +58,24 @@ const TherapistDashboard = ({ user, onLogout }) => {
       setError(t("therapist_users_load_error"));
     } finally {
       setWorkersLoading(false);
+    }
+  };
+
+  const handleDeleteWorker = async (worker) => {
+    if (!worker?.id) return;
+    if (!window.confirm(t("therapist_confirm_delete_user"))) return;
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      await apiService.delete(`/admin/user/${worker.id}`);
+      setSuccess(t("therapist_user_deleted"));
+      setSelectedWorker(null);
+      await loadWorkers();
+    } catch (err) {
+      setError(err?.message || "Error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,9 +149,65 @@ const TherapistDashboard = ({ user, onLogout }) => {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString(lang === "ru" ? "ru-RU" : "zh-CN", {
+    const locales = { ru: "ru-RU", zh: "zh-CN", en: "en-US" };
+    return new Date(dateStr).toLocaleDateString(locales[lang] || "en-US", {
       day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
     });
+  };
+
+  const computeMoodTrend = (journalScores = []) => {
+    if (!Array.isArray(journalScores) || journalScores.length < 2) return null;
+    const sorted = [...journalScores].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const first = sorted[0]?.score;
+    const last = sorted[sorted.length - 1]?.score;
+    if (typeof first !== "number" || typeof last !== "number") return null;
+    const delta = last - first;
+    return { delta, first, last };
+  };
+
+  const buildWorkerAnalytics = (worker) => {
+    const testSeries = (worker?.test_results || [])
+      .slice()
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .map((r) => ({
+        name: new Date(r.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }),
+        score: r.total_score,
+      }));
+
+    const moodSeries = (worker?.journal_scores || [])
+      .slice()
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map((j) => ({
+        day: new Date(j.date).toLocaleDateString("ru-RU", { weekday: "short" }),
+        mood: j.score,
+      }));
+
+    // Burnout risk score (same logic as BurnoutScale)
+    let riskScore = 50;
+    if (testSeries.length > 0) {
+      const avgTest = testSeries.reduce((s, r) => s + (r.score || 0), 0) / testSeries.length;
+      riskScore = Math.max(0, 100 - avgTest);
+    }
+    if (moodSeries.length > 0) {
+      const avgMood = moodSeries.reduce((s, j) => s + (j.mood || 0), 0) / moodSeries.length;
+      const moodRisk = ((5 - avgMood) / 5) * 100;
+      riskScore = Math.round((riskScore + moodRisk) / 2);
+    }
+    const burnout = Math.min(100, Math.max(0, riskScore));
+
+    return { testSeries, moodSeries, burnout };
+  };
+
+  const getBurnoutLabel = (level) => {
+    if (level >= 70) return t("burnout_high");
+    if (level >= 40) return t("burnout_medium");
+    return t("burnout_low");
+  };
+
+  const getBurnoutColor = (level) => {
+    if (level >= 70) return "#dc3545";
+    if (level >= 40) return "#ffc107";
+    return "#28a745";
   };
 
   return (
@@ -144,14 +219,19 @@ const TherapistDashboard = ({ user, onLogout }) => {
           <Nav className="ms-auto">
             <div className="user-info">
               <Dropdown>
-                <Dropdown.Toggle variant="outline-light" size="sm">{lang === "ru" ? "RU" : "中文"}</Dropdown.Toggle>
+                <Dropdown.Toggle variant="outline-secondary" size="sm" className="lang-toggle">
+                  {lang === "ru" ? "RU" : lang === "en" ? "EN" : "中文"}
+                </Dropdown.Toggle>
                 <Dropdown.Menu>
                   <Dropdown.Item onClick={() => switchLang("ru")}>Русский</Dropdown.Item>
                   <Dropdown.Item onClick={() => switchLang("zh")}>中文</Dropdown.Item>
+                  <Dropdown.Item onClick={() => switchLang("en")}>English</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
               <span>{t("therapist_welcome")} {user?.fullName || user?.email}!</span>
-              <Button variant="outline-light" size="sm" onClick={handleLogout}>{t("nav_logout")}</Button>
+              <Button variant="outline-danger" size="sm" className="logout-btn" onClick={handleLogout}>
+                {t("nav_logout")}
+              </Button>
             </div>
           </Nav>
         </Container>
@@ -407,15 +487,132 @@ const TherapistDashboard = ({ user, onLogout }) => {
                             <p className="mb-0">{selectedWorker.mail}</p>
                           </div>
                         </div>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="d-flex gap-3 mt-2">
+                            <span style={{ color: "#a1a1b5", fontSize: "0.85rem" }}>
+                              {t("therapist_user_avg")}: <strong style={{ color: "#a29bfe" }}>{selectedWorker.avg_score ?? "—"}</strong>
+                            </span>
+                            <span style={{ color: "#a1a1b5", fontSize: "0.85rem" }}>
+                              {t("therapist_user_journals")}: <strong style={{ color: "#00cec9" }}>{selectedWorker.journals_count}</strong>
+                            </span>
+                          </div>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteWorker(selectedWorker)}
+                            disabled={loading}
+                          >
+                            {t("therapist_delete_user")}
+                          </Button>
+                        </div>
                         <div className="d-flex gap-3 mt-2">
-                          <span style={{ color: "#a1a1b5", fontSize: "0.85rem" }}>
-                            {t("therapist_user_avg")}: <strong style={{ color: "#a29bfe" }}>{selectedWorker.avg_score ?? "—"}</strong>
-                          </span>
-                          <span style={{ color: "#a1a1b5", fontSize: "0.85rem" }}>
-                            {t("therapist_user_journals")}: <strong style={{ color: "#00cec9" }}>{selectedWorker.journals_count}</strong>
-                          </span>
+                          {/* spacing kept for layout; detailed analytics below */}
                         </div>
                       </div>
+
+                      {/* Extended analytics */}
+                      <div className="mb-3">
+                        <h6 className="mb-2">{t("therapist_user_mood")}</h6>
+                        {Array.isArray(selectedWorker.journal_scores) && selectedWorker.journal_scores.length > 0 ? (
+                          <>
+                            <div style={{ color: "#a1a1b5", fontSize: "0.85rem" }} className="mb-2">
+                              {(() => {
+                                const trend = computeMoodTrend(selectedWorker.journal_scores);
+                                if (!trend) return "—";
+                                const arrow = trend.delta > 0 ? "↑" : trend.delta < 0 ? "↓" : "→";
+                                return `${t("therapist_user_mood_trend")}: ${arrow} (${trend.first} → ${trend.last}, Δ ${trend.delta})`;
+                              })()}
+                            </div>
+                            <div style={{ maxHeight: 160, overflow: "auto", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 12 }}>
+                              {[...selectedWorker.journal_scores]
+                                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                .slice(0, 14)
+                                .map((js, idx) => (
+                                  <div key={`${js.date}-${idx}`} className="d-flex justify-content-between" style={{ padding: "4px 0", borderBottom: "1px dashed rgba(255,255,255,0.06)" }}>
+                                    <span style={{ color: "#a1a1b5", fontSize: "0.85rem" }}>{formatDate(js.date)}</span>
+                                    <strong style={{ color: "#00cec9" }}>{js.score}/5</strong>
+                                  </div>
+                                ))}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-muted" style={{ fontSize: "0.9rem" }}>{t("analytics_no_mood")}</div>
+                        )}
+                      </div>
+
+                      {/* Analytics like main page (charts + burnout) */}
+                      {(() => {
+                        const { testSeries, moodSeries, burnout } = buildWorkerAnalytics(selectedWorker);
+                        const noData = testSeries.length === 0 && moodSeries.length === 0;
+                        if (noData) return null;
+                        return (
+                          <div className="mb-4">
+                            <Row className="g-3">
+                              <Col lg={6}>
+                                <div className="analytics-card p-3" style={{ borderRadius: 14 }}>
+                                  <h6 className="mb-3">{t("analytics_tests")}</h6>
+                                  {testSeries.length === 0 ? (
+                                    <div className="text-muted">{t("analytics_no_tests")}</div>
+                                  ) : (
+                                    <ResponsiveContainer width="100%" height={240}>
+                                      <LineChart data={testSeries}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                        <XAxis dataKey="name" stroke="#999" />
+                                        <YAxis stroke="#999" />
+                                        <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }} />
+                                        <Line type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={3} dot={{ fill: "#6366f1", r: 4 }} activeDot={{ r: 6 }} />
+                                      </LineChart>
+                                    </ResponsiveContainer>
+                                  )}
+                                </div>
+                              </Col>
+                              <Col lg={6}>
+                                <div className="analytics-card p-3" style={{ borderRadius: 14 }}>
+                                  <h6 className="mb-3">{t("analytics_mood")}</h6>
+                                  {moodSeries.length === 0 ? (
+                                    <div className="text-muted">{t("analytics_no_mood")}</div>
+                                  ) : (
+                                    <ResponsiveContainer width="100%" height={240}>
+                                      <BarChart data={moodSeries}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                        <XAxis dataKey="day" stroke="#999" />
+                                        <YAxis stroke="#999" domain={[0, 5]} />
+                                        <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #ddd", borderRadius: "8px" }} />
+                                        <Bar dataKey="mood" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+                                      </BarChart>
+                                    </ResponsiveContainer>
+                                  )}
+                                </div>
+                              </Col>
+                            </Row>
+
+                            <div className="mt-3 analytics-card p-3" style={{ borderRadius: 14 }}>
+                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                <h6 className="mb-0">{t("burnout_title")}</h6>
+                                <strong style={{ color: getBurnoutColor(burnout) }}>{burnout}%</strong>
+                              </div>
+                              <div style={{ height: 10, borderRadius: 999, background: "#e5e7eb", overflow: "hidden" }}>
+                                <div style={{ width: `${burnout}%`, height: "100%", background: getBurnoutColor(burnout) }} />
+                              </div>
+                              <div className="text-muted mt-2" style={{ fontSize: "0.9rem" }}>
+                                {getBurnoutLabel(burnout)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      <div className="mb-4">
+                        <h6 className="mb-2">{t("therapist_user_ai_summary")}</h6>
+                        {selectedWorker.ai_summary ? (
+                          <div style={{ whiteSpace: "pre-wrap", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 12 }}>
+                            {selectedWorker.ai_summary}
+                          </div>
+                        ) : (
+                          <div className="text-muted" style={{ fontSize: "0.9rem" }}>{t("therapist_user_no_summary")}</div>
+                        )}
+                      </div>
+
                       <div>
                         {selectedWorker.test_results.length === 0 ? (
                           <div className="empty-state">
