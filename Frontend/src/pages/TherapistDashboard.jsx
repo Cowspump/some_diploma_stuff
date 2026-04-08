@@ -141,6 +141,11 @@ const TherapistDashboard = ({ user, onLogout }) => {
   };
 
   const totalQuestions = tests.reduce((s, t) => s + (t.question_count || 0), 0);
+  const testsById = React.useMemo(() => {
+    const m = new Map();
+    for (const tt of tests) m.set(tt.id, tt);
+    return m;
+  }, [tests]);
 
   const getScoreBadge = (score) => {
     if (score >= 80) return <Badge bg="success">{t("results_excellent")}</Badge>;
@@ -208,6 +213,12 @@ const TherapistDashboard = ({ user, onLogout }) => {
     if (level >= 70) return "#dc3545";
     if (level >= 40) return "#ffc107";
     return "#28a745";
+  };
+
+  const getLocalizedTestTitle = (result) => {
+    const id = result?.test_id;
+    const fromList = id != null ? testsById.get(id)?.title : undefined;
+    return fromList || result?.test_title;
   };
 
   return (
@@ -623,7 +634,9 @@ const TherapistDashboard = ({ user, onLogout }) => {
                           selectedWorker.test_results.map((r) => (
                             <div key={r.id} className="result-item">
                               <div>
-                                <div className="result-test-name">{r.test_title || `Test #${r.test_id || "?"}`}</div>
+                                <div className="result-test-name">
+                                  {getLocalizedTestTitle(r) || `Test #${r.test_id || "?"}`}
+                                </div>
                                 <div className="result-date">{formatDate(r.created_at)}</div>
                               </div>
                               <div className="d-flex align-items-center gap-2">
