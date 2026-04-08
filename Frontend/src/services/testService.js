@@ -37,8 +37,12 @@ export const saveTestResult = async (answers, testId) => {
   return response;
 };
 
-export const getTestResults = async () => {
-  const response = await apiService.get('/test/results');
+export const getTestResults = async (lang = "ru") => {
+  let endpoint = '/test/results';
+  if (lang && lang !== "ru") {
+    endpoint += `?lang=${lang}`;
+  }
+  const response = await apiService.get(endpoint);
   return response.results || [];
 };
 

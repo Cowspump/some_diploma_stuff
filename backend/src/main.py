@@ -346,6 +346,7 @@ def submit_test(data: schemas.TestSubmit, user: models.User = Depends(auth.get_c
 
 @app.get("/test/results", response_model=schemas.TestResultsResponse, tags=["testing"])
 def get_my_test_results(
+        lang: Optional[str] = Query(None),
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
@@ -366,6 +367,13 @@ def get_my_test_results(
             test = db.query(models.Test).filter(models.Test.id == r.test_id).first()
             if test:
                 test_title = test.title
+                if lang and lang != "ru":
+                    cached = db.query(models.TestTranslation).filter(
+                        models.TestTranslation.test_id == test.id,
+                        models.TestTranslation.lang == lang
+                    ).first()
+                    if cached and cached.translated_title:
+                        test_title = cached.translated_title
         result_list.append({
             "id": r.id,
             "total_score": r.total_score,
@@ -514,6 +522,24 @@ def get_ai_summary(
             "created_at": summary.created_at
         }
     }
+
+
+@app.get("/ai/chat-history", response_model=schemas.AIChatHistoryResponse, tags=["ai"])
+def get_ai_chat_history(
+        limit: int = Query(50, ge=1, le=200),
+        user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(database.get_db),
+):
+    logs = (
+        db.query(models.AILog)
+        .filter(models.AILog.user_id == user.id)
+        .order_by(models.AILog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    # return chronological order
+    logs = list(reversed(logs))
+    return {"history": logs}
 
 
 @app.post("/ai/explain-question", tags=["ai"])

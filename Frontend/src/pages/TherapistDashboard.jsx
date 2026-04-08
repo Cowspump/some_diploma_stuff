@@ -7,6 +7,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { addQuestion, deleteQuestion, fetchTestQuestions, createTest, getTests, deleteTest } from "../services/testService";
 import { apiService } from "../services/api";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { getLocale } from "../i18n/locale";
 import "../styles/Dashboard.css";
 
 const TherapistDashboard = ({ user, onLogout }) => {
@@ -29,7 +30,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [workersLoading, setWorkersLoading] = useState(false);
 
-  useEffect(() => { loadTests(); }, []);
+  useEffect(() => { loadTests(); }, [lang]);
   useEffect(() => {
     if (selectedTest) loadQuestions(selectedTest.id);
     else setQuestions([]);
@@ -41,12 +42,12 @@ const TherapistDashboard = ({ user, onLogout }) => {
 
   const loadTests = async () => {
     setLoading(true);
-    try { setTests(await getTests()); } catch { setError("Error loading tests"); } finally { setLoading(false); }
+    try { setTests(await getTests(lang)); } catch { setError(t("therapist_load_tests_error")); } finally { setLoading(false); }
   };
 
   const loadQuestions = async (testId) => {
     setLoading(true);
-    try { setQuestions(await fetchTestQuestions(testId)); } catch { setError("Error loading questions"); } finally { setLoading(false); }
+    try { setQuestions(await fetchTestQuestions(testId, lang)); } catch { setError(t("therapist_load_questions_error")); } finally { setLoading(false); }
   };
 
   const loadWorkers = async () => {
@@ -142,15 +143,14 @@ const TherapistDashboard = ({ user, onLogout }) => {
   const totalQuestions = tests.reduce((s, t) => s + (t.question_count || 0), 0);
 
   const getScoreBadge = (score) => {
-    if (score >= 80) return <Badge bg="success">Excellent</Badge>;
-    if (score >= 60) return <Badge bg="primary">Good</Badge>;
-    if (score >= 40) return <Badge bg="warning">Average</Badge>;
-    return <Badge bg="danger">Attention</Badge>;
+    if (score >= 80) return <Badge bg="success">{t("results_excellent")}</Badge>;
+    if (score >= 60) return <Badge bg="primary">{t("results_good")}</Badge>;
+    if (score >= 40) return <Badge bg="warning">{t("results_average")}</Badge>;
+    return <Badge bg="danger">{t("results_attention")}</Badge>;
   };
 
   const formatDate = (dateStr) => {
-    const locales = { ru: "ru-RU", zh: "zh-CN", en: "en-US" };
-    return new Date(dateStr).toLocaleDateString(locales[lang] || "en-US", {
+    return new Date(dateStr).toLocaleDateString(getLocale(lang), {
       day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
     });
   };
@@ -170,7 +170,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
       .slice()
       .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
       .map((r) => ({
-        name: new Date(r.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }),
+        name: new Date(r.created_at).toLocaleDateString(getLocale(lang), { day: "2-digit", month: "short" }),
         score: r.total_score,
       }));
 
@@ -178,7 +178,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
       .slice()
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .map((j) => ({
-        day: new Date(j.date).toLocaleDateString("ru-RU", { weekday: "short" }),
+        day: new Date(j.date).toLocaleDateString(getLocale(lang), { weekday: "short" }),
         mood: j.score,
       }));
 

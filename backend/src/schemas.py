@@ -108,6 +108,20 @@ class AIAsk(BaseModel):
     chat_history: Optional[List[ChatMessage]] = None
 
 
+class AIChatLogOut(BaseModel):
+    id: int
+    request: str
+    response: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AIChatHistoryResponse(BaseModel):
+    history: List[AIChatLogOut]
+
+
 class JournalCreate(BaseModel):
     score: int
     note: str = None

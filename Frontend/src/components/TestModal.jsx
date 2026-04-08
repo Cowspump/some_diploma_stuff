@@ -33,7 +33,13 @@ const TestModal = ({ show, onHide, userId }) => {
       setScore(0);
       setExplanations({});
     }
-  }, [show]);
+  }, [show, lang]);
+
+  useEffect(() => {
+    if (show && selectedTest?.id) {
+      handleSelectTest(selectedTest);
+    }
+  }, [lang, show, selectedTest]);
 
   const loadTests = async () => {
     setLoading(true);
@@ -110,7 +116,7 @@ const TestModal = ({ show, onHide, userId }) => {
       const res = await explainQuestion(questionId, lang);
       setExplanations((prev) => ({ ...prev, [questionId]: res.explanation }));
     } catch (err) {
-      setExplanations((prev) => ({ ...prev, [questionId]: "Ошибка при запросе объяснения." }));
+      setExplanations((prev) => ({ ...prev, [questionId]: t("ai_explain_error") }));
     } finally {
       setExplainLoadingId(null);
     }
@@ -122,10 +128,10 @@ const TestModal = ({ show, onHide, userId }) => {
     for (const q of questions) {
       if (!explanations[q.id]) {
         try {
-          const res = await explainQuestion(q.id);
+          const res = await explainQuestion(q.id, lang);
           setExplanations((prev) => ({ ...prev, [q.id]: res.explanation }));
         } catch {
-          setExplanations((prev) => ({ ...prev, [q.id]: "Ошибка" }));
+          setExplanations((prev) => ({ ...prev, [q.id]: t("ai_error_short") }));
         }
       }
     }

@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { Modal, Form, Button, Spinner, Alert } from "react-bootstrap";
 import { useLanguage } from "../contexts/LanguageContext";
 import { apiService } from "../services/api";
+import { getAIChatHistory } from "../services/aiService";
+import { getLocale } from "../i18n/locale";
 import "../styles/AIChatModal.css";
 
 const AIChatModal = ({ show, onHide, journalHistory: initialJournalHistory, testResults: initialTestResults }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,11 +21,33 @@ const AIChatModal = ({ show, onHide, journalHistory: initialJournalHistory, test
 
   useEffect(() => {
     if (show) {
-      setMessages([{ id: 1, text: t("ai_greeting"), sender: "ai", timestamp: new Date() }]);
+      // Load persisted chat first; fall back to greeting if empty
+      loadChatHistory();
       if (!initialJournalHistory || initialJournalHistory.length === 0) loadData();
       else { setJournalHistory(initialJournalHistory || []); setTestResults(initialTestResults || []); }
     }
   }, [show]);
+
+  const loadChatHistory = async () => {
+    try {
+      const history = await getAIChatHistory(80);
+      if (!history || history.length === 0) {
+        setMessages([{ id: 1, text: t("ai_greeting"), sender: "ai", timestamp: new Date() }]);
+        return;
+      }
+
+      const restored = [];
+      for (const item of history) {
+        const ts = item.created_at ? new Date(item.created_at) : new Date();
+        restored.push({ id: `u-${item.id}`, text: item.request || "", sender: "user", timestamp: ts });
+        restored.push({ id: `a-${item.id}`, text: item.response || "", sender: "ai", timestamp: ts });
+      }
+      setMessages(restored);
+    } catch (err) {
+      // If history can't be loaded, still allow chatting
+      setMessages([{ id: 1, text: t("ai_greeting"), sender: "ai", timestamp: new Date() }]);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -115,7 +139,9 @@ const AIChatModal = ({ show, onHide, journalHistory: initialJournalHistory, test
                 <div key={msg.id} className={`message ${msg.sender}`}>
                   <div className={`message-content ${msg.sender}`}>
                     <p>{msg.text}</p>
-                    <small className="message-time">{msg.timestamp.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</small>
+                    <small className="message-time">
+                      {msg.timestamp.toLocaleTimeString(getLocale(lang), { hour: "2-digit", minute: "2-digit" })}
+                    </small>
                   </div>
                 </div>
               ))}

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button, Alert, Card, Badge } from "react-bootstrap";
 import { useLanguage } from "../contexts/LanguageContext";
 import { apiService } from "../services/api";
+import { getLocale } from "../i18n/locale";
 import "../styles/App.css";
 
 const MoodJournal = ({ isLoggedIn }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [moodEntry, setMoodEntry] = useState("");
   const [currentMood, setCurrentMood] = useState(3);
   const [submitted, setSubmitted] = useState(false);
@@ -156,7 +157,13 @@ const MoodJournal = ({ isLoggedIn }) => {
                                 <span className="fs-5">{getMoodLabel(entry.wellbeing_score)}</span>
                                 <Badge bg="info">{getMoodName(entry.wellbeing_score)}</Badge>
                                 <small className="text-muted">
-                                  {new Date(entry.created_at).toLocaleDateString("ru-RU", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                  {new Date(entry.created_at).toLocaleDateString(getLocale(lang), {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </small>
                               </div>
                               <p className="mb-0 text-break">{entry.note_text || ""}</p>

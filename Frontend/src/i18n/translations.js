@@ -96,6 +96,8 @@ const translations = {
     ai_greeting: "Привет! Я ваш ИИ-помощник. Я проанализировал вашу историю и готов помочь вам. Какие у вас есть вопросы?",
     ai_error: "Не удалось получить ответ от ИИ-ассистента",
     ai_error_msg: "Извините, произошла ошибка при обработке вашего запроса. Попробуйте еще раз.",
+    ai_error_short: "Ошибка",
+    ai_explain_error: "Ошибка при запросе объяснения.",
     ai_stress: "Повышенный стресс",
     ai_stress_desc: "Ваши результаты показывают высокий уровень стресса. Рекомендуем регулярные паузы и медитацию.",
     ai_trend: "Анализ тренда",
@@ -260,6 +262,8 @@ const translations = {
     therapist_user_tests_count: "тестов пройдено",
     therapist_user_no_results: "Пользователь пока не проходил тесты",
     therapist_users_load_error: "Ошибка загрузки пользователей",
+    therapist_load_tests_error: "Ошибка загрузки тестов",
+    therapist_load_questions_error: "Ошибка загрузки вопросов",
 
     // Language
     lang_label: "Язык",
@@ -374,6 +378,8 @@ const translations = {
     ai_greeting: "你好！我是您的AI助手。我已分析了您的历史记录，准备帮助您。您有什么问题吗？",
     ai_error: "无法获取AI助手的回复",
     ai_error_msg: "抱歉，处理您的请求时出错。请重试。",
+    ai_error_short: "错误",
+    ai_explain_error: "获取解释时出错。",
     ai_stress: "压力升高",
     ai_stress_desc: "您的结果显示压力水平较高。建议定期休息和冥想。",
     ai_trend: "趋势分析",
@@ -538,6 +544,8 @@ const translations = {
     therapist_user_tests_count: "已完成测试",
     therapist_user_no_results: "用户尚未完成任何测试",
     therapist_users_load_error: "加载用户失败",
+    therapist_load_tests_error: "加载测试失败",
+    therapist_load_questions_error: "加载问题失败",
 
     // Language
     lang_label: "语言",
@@ -652,6 +660,8 @@ const translations = {
     ai_greeting: "Hello! I'm your AI assistant. I've analyzed your history and I'm ready to help you. What questions do you have?",
     ai_error: "Failed to get a response from the AI assistant",
     ai_error_msg: "Sorry, an error occurred while processing your request. Please try again.",
+    ai_error_short: "Error",
+    ai_explain_error: "Failed to get an explanation.",
     ai_stress: "Elevated Stress",
     ai_stress_desc: "Your results show high stress levels. We recommend regular breaks and meditation.",
     ai_trend: "Trend Analysis",
@@ -816,6 +826,8 @@ const translations = {
     therapist_user_tests_count: "tests completed",
     therapist_user_no_results: "User hasn't taken any tests yet",
     therapist_users_load_error: "Failed to load users",
+    therapist_load_tests_error: "Failed to load tests",
+    therapist_load_questions_error: "Failed to load questions",
 
     // Language
     lang_label: "Language",

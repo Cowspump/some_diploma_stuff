@@ -3,10 +3,11 @@ import { Container, Row, Col, Spinner } from "react-bootstrap";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useLanguage } from "../contexts/LanguageContext";
 import { apiService } from "../services/api";
+import { getLocale } from "../i18n/locale";
 import "../styles/App.css";
 
 const AnalyticsSection = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [testData, setTestData] = useState([]);
   const [moodData, setMoodData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ const AnalyticsSection = () => {
     const token = localStorage.getItem("token");
     if (token) loadData();
     else setLoading(false);
-  }, []);
+  }, [lang]);
 
   const loadData = async () => {
     setLoading(true);
@@ -27,12 +28,18 @@ const AnalyticsSection = () => {
       setTestData(
         (testRes.results || [])
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-          .map((r) => ({ name: new Date(r.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }), score: r.total_score }))
+          .map((r) => ({
+            name: new Date(r.created_at).toLocaleDateString(getLocale(lang), { day: "2-digit", month: "short" }),
+            score: r.total_score,
+          }))
       );
       setMoodData(
         (journalRes.journals || [])
           .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-          .map((j) => ({ day: new Date(j.created_at).toLocaleDateString("ru-RU", { weekday: "short" }), mood: j.wellbeing_score }))
+          .map((j) => ({
+            day: new Date(j.created_at).toLocaleDateString(getLocale(lang), { weekday: "short" }),
+            mood: j.wellbeing_score,
+          }))
       );
     } catch (err) {
       console.error("Analytics load error:", err);

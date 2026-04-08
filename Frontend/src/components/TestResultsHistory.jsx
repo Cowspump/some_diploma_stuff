@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Badge, Modal, Alert } from "react-bootstrap";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getTestResults } from "../services/testService";
+import { getLocale } from "../i18n/locale";
 import "../styles/TestResultsHistory.css";
 
 const TestResultsHistory = ({ userId }) => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [results, setResults] = useState([]);
   const [selectedResult, setSelectedResult] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -15,13 +16,13 @@ const TestResultsHistory = ({ userId }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) loadResults();
-  }, [userId]);
+  }, [userId, lang]);
 
   const loadResults = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await getTestResults();
+      const data = await getTestResults(lang);
       setResults((data || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     } catch (err) {
       if (!err.message?.includes("Only workers")) setError(t("results_load_error"));
@@ -37,7 +38,14 @@ const TestResultsHistory = ({ userId }) => {
     return <Badge bg="danger">{t("results_attention")}</Badge>;
   };
 
-  const formatDate = (ds) => new Date(ds).toLocaleDateString("ru-RU", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  const formatDate = (ds) =>
+    new Date(ds).toLocaleDateString(getLocale(lang), {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   return (
     <section id="results" className="results-history-section py-5">

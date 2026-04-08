@@ -8,7 +8,6 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import models
-import database
 
 load_dotenv()
 
@@ -16,6 +15,66 @@ from openai import OpenAI
 
 client = OpenAI()
 logger = logging.getLogger(__name__)
+
+def _detect_lang(text: str) -> str:
+    """Very small heuristic language detection (ru/zh/en) without extra deps."""
+    if not text:
+        return "en"
+    sample = text.strip()
+    if not sample:
+        return "en"
+
+    # Chinese Han characters
+    for ch in sample:
+        if "\u4e00" <= ch <= "\u9fff":
+            return "zh"
+
+    # Count Cyrillic vs Latin letters
+    cyr = 0
+    lat = 0
+    for ch in sample:
+        o = ord(ch)
+        if (0x0400 <= o <= 0x04FF) or (0x0500 <= o <= 0x052F):
+            cyr += 1
+        elif (0x0041 <= o <= 0x005A) or (0x0061 <= o <= 0x007A):
+            lat += 1
+
+    if cyr > lat and cyr >= 2:
+        return "ru"
+    return "en"
+
+
+def _lang_instruction(lang: str) -> str:
+    if lang == "ru":
+        return "Отвечай на русском языке."
+    if lang == "zh":
+        return "请用中文回答。"
+    return "Answer in English."
+
+
+def _normalize_chat_history(chat_history: list | None) -> list[dict]:
+    """Convert frontend history ({role,user/ai, text}) to OpenAI messages ({role, content})."""
+    if not chat_history:
+        return []
+
+    normalized: list[dict] = []
+    for msg in chat_history[-20:]:
+        role_raw = (msg.get("role") or "").strip().lower()
+        text = msg.get("text") or ""
+
+        if role_raw in ("user",):
+            role = "user"
+        elif role_raw in ("assistant", "ai"):
+            role = "assistant"
+        elif role_raw in ("system",):
+            role = "system"
+        else:
+            # Unknown role; skip to avoid confusing the model
+            continue
+
+        normalized.append({"role": role, "content": text})
+
+    return normalized
 
 
 def generate_user_summary(user_id: int, db: Session) -> dict:
@@ -155,23 +214,31 @@ def ask_ai_assistant(user_id: int, prompt: str, db: Session, chat_history: list 
     try:
         user_context = _build_user_context(user_id, db)
 
+        # Detect language by the latest user message (prefer chat_history if present)
+        detected_lang = None
+        if chat_history:
+            for m in reversed(chat_history):
+                if (m.get("role") or "").strip().lower() == "user" and (m.get("text") or "").strip():
+                    detected_lang = _detect_lang(m.get("text") or "")
+                    break
+        if not detected_lang:
+            detected_lang = _detect_lang(prompt or "")
+
+        lang_directive = _lang_instruction(detected_lang)
+
         system_prompt = f"""Ты профессиональный психологический ассистент.
 Твоя задача - помогать пользователям с их психологическим состоянием, давать советы и поддержку.
 Ты помнишь весь разговор с пользователем и знаешь всё о его состоянии.
-Отвечай на том языке, на котором пишет пользователь. Будь эмпатичным и профессиональным.
+{lang_directive} Будь эмпатичным и профессиональным.
 
 === Полная информация о работнике ===
 {user_context}
 === Конец информации ==="""
 
-        # Build messages with full chat history
         messages = [{"role": "system", "content": system_prompt}]
 
-        # Add previous chat history from this session
-        if chat_history:
-            for msg in chat_history[-20:]:  # last 20 messages to stay within token limits
-                role = "user" if msg.get("role") == "user" else "assistant"
-                messages.append({"role": role, "text": msg.get("text", "")})
+        # Add previous chat history from this session (normalized)
+        messages.extend(_normalize_chat_history(chat_history))
 
         # Also load recent AI logs as fallback context (previous sessions)
         if not chat_history:
@@ -186,20 +253,12 @@ def ask_ai_assistant(user_id: int, prompt: str, db: Session, chat_history: list 
                 messages.append({"role": "user", "content": log.request})
                 messages.append({"role": "assistant", "content": log.response})
 
-        # Fix: ensure all messages use "content" key
-        fixed_messages = []
-        for m in messages:
-            if "text" in m and "content" not in m:
-                fixed_messages.append({"role": m["role"], "content": m["text"]})
-            else:
-                fixed_messages.append(m)
-
         # Add current prompt
-        fixed_messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": prompt})
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=fixed_messages,
+            messages=messages,
             max_tokens=800,
             temperature=0.8
         )

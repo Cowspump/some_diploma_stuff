@@ -48,8 +48,18 @@ def _parse_option_line(line: str) -> dict | None:
     if not s:
         return None
 
-    # A. text（0分）
+    # A. text（0分） / A. text (0分)
     m = re.match(r"^[A-D]\.\s*(.+?)\s*[（(]\s*(\d+)\s*分\s*[)）]\s*$", s)
+    if m:
+        return {"text": m.group(1).strip(), "points": int(m.group(2))}
+
+    # A. text (0) / A. text（0）
+    m = re.match(r"^[A-D]\.\s*(.+?)\s*[（(]\s*(\d+)\s*[)）]\s*$", s)
+    if m:
+        return {"text": m.group(1).strip(), "points": int(m.group(2))}
+
+    # A. text (0 points)
+    m = re.match(r"^[A-D]\.\s*(.+?)\s*[（(]\s*(\d+)\s*points?\s*[)）]\s*$", s, flags=re.IGNORECASE)
     if m:
         return {"text": m.group(1).strip(), "points": int(m.group(2))}
 
@@ -59,6 +69,99 @@ def _parse_option_line(line: str) -> dict | None:
         return {"text": m.group(1).strip(), "points": int(m.group(2))}
 
     return None
+
+
+def _needs_test_reseed(db: Session) -> bool:
+    """
+    Reseed tests when we detect that canonical RU content didn't get loaded
+    (e.g. tests ended up in ZH due to parsing issues) or when forced via env.
+    """
+    if os.getenv("FORCE_RESEED_TESTS") == "1":
+        return True
+
+    # No tests => seed path will create them anyway
+    any_test = db.query(models.Test).first()
+    if not any_test:
+        return False
+
+    # If any canonical test title contains CJK, likely RU parsing didn't apply
+    def has_cjk(text: str | None) -> bool:
+        if not text:
+            return False
+        return any("\u4e00" <= ch <= "\u9fff" for ch in text)
+
+    tests = db.query(models.Test).all()
+    if any(has_cjk(t.title) or has_cjk(t.description) for t in tests):
+        return True
+
+    # Sometimes titles are RU but canonical questions are still ZH due to parsing issues.
+    questions = db.query(models.Question).limit(50).all()
+    return any(has_cjk(q.text) for q in questions)
+
+
+def _reseed_tests_from_txt(db: Session, therapist_id: int):
+    """
+    Drop existing tests/questions/translations/results and re-create them from txt files.
+    Users/journals are preserved.
+    """
+    logger.info("Reseeding tests from backend/test*.txt ...")
+
+    # Delete dependent rows first (FK order)
+    db.query(models.QuestionTranslation).delete(synchronize_session=False)
+    db.query(models.TestTranslation).delete(synchronize_session=False)
+    db.query(models.TestResult).delete(synchronize_session=False)
+    db.query(models.Question).delete(synchronize_session=False)
+    db.query(models.Test).delete(synchronize_session=False)
+    db.flush()
+
+    all_tests = []
+    for test_data in (_load_tests_from_txt() or []):
+        # Canonical language in DB: RU. Translations for ZH/EN go into *_translations tables.
+        test = models.Test(
+            title=test_data.get("title_ru") or test_data.get("title_zh") or test_data.get("title_en"),
+            description=test_data.get("description_ru") or test_data.get("description_zh") or test_data.get("description_en"),
+            therapist_id=therapist_id,
+        )
+        db.add(test)
+        db.flush()
+        all_tests.append(test)
+
+        for lang, title_key, desc_key in (
+            ("zh", "title_zh", "description_zh"),
+            ("en", "title_en", "description_en"),
+        ):
+            title_val = test_data.get(title_key)
+            if title_val:
+                db.add(models.TestTranslation(
+                    test_id=test.id,
+                    lang=lang,
+                    translated_title=title_val,
+                    translated_description=test_data.get(desc_key),
+                ))
+
+        for q_data in test_data["questions"]:
+            base_text = q_data.get("text_ru") or q_data.get("text_zh") or q_data.get("text_en")
+            base_options = q_data.get("options_ru") or q_data.get("options_zh") or q_data.get("options_en")
+            question = models.Question(text=base_text, options=base_options, test_id=test.id)
+            db.add(question)
+            db.flush()
+
+            for lang, text_key, options_key in (
+                ("zh", "text_zh", "options_zh"),
+                ("en", "text_en", "options_en"),
+            ):
+                t_text = q_data.get(text_key)
+                t_opts = q_data.get(options_key)
+                if t_text and t_opts:
+                    db.add(models.QuestionTranslation(
+                        question_id=question.id,
+                        lang=lang,
+                        translated_text=t_text,
+                        translated_options=t_opts,
+                    ))
+
+    db.commit()
+    logger.info("Tests reseeded successfully (%s tests).", len(all_tests))
 
 
 def _load_tests_from_txt() -> list[dict]:
@@ -168,14 +271,14 @@ def _load_tests_from_txt() -> list[dict]:
         return tests
 
     zh_tests = parse(zh_lines)
-    ru_tests = parse(ru_lines) if ru_lines else None
-    en_tests = parse(en_lines) if en_lines else None
+    ru_tests: list[dict] = parse(ru_lines) if ru_lines else []
+    en_tests: list[dict] = parse(en_lines) if en_lines else []
 
     # Merge by index
     merged: list[dict] = []
     for ti, zt in enumerate(zh_tests):
-        rt = ru_tests[ti] if ru_tests and ti < len(ru_tests) else None
-        et = en_tests[ti] if en_tests and ti < len(en_tests) else None
+        rt = ru_tests[ti] if ti < len(ru_tests) else None
+        et = en_tests[ti] if ti < len(en_tests) else None
 
         out = {
             "title_zh": zt["title"],
@@ -1332,7 +1435,13 @@ JOURNAL_NOTES = [
 
 def seed_database(db: Session):
     """Populate DB with test data if no users exist."""
-    if db.query(models.User).first():
+    existing_user = db.query(models.User).first()
+    if existing_user:
+        # Keep users, but fix test canon language if needed.
+        if _needs_test_reseed(db):
+            therapist = db.query(models.User).filter(models.User.role == models.UserRole.therapist).first()
+            therapist_id = therapist.id if therapist else existing_user.id
+            _reseed_tests_from_txt(db, therapist_id=therapist_id)
         return
 
     logger.info("Database is empty, seeding test data...")
@@ -1411,9 +1520,9 @@ def seed_database(db: Session):
     # Workers take tests
     for i, worker in enumerate(workers):
         profile = WORKER_PROFILES[i % len(WORKER_PROFILES)]
-        for ti, test in enumerate(all_tests):
+        for test in all_tests:
             total_score = 0
-            for j, question in enumerate(test.questions):
+            for question in test.questions:
                 idx = random.randint(profile["min"], min(profile["max"], len(question.options) - 1))
                 total_score += question.options[idx]["points"]
 
