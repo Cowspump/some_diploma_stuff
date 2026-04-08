@@ -33,13 +33,28 @@ const TestModal = ({ show, onHide, userId }) => {
       setScore(0);
       setExplanations({});
     }
-  }, [show, lang]);
+  }, [show]);
 
   useEffect(() => {
-    if (show && selectedTest?.id) {
-      handleSelectTest(selectedTest);
+    if (!show) return;
+    loadTests();
+    if (selectedTest?.id && !submitted) {
+      setLoading(true);
+      setError("");
+      fetchTestQuestions(selectedTest.id, lang)
+        .then((data) => {
+          if (data.length === 0) {
+            setError(t("test_no_questions"));
+            setQuestions([]);
+          } else {
+            setQuestions(data);
+          }
+        })
+        .catch(() => setError(t("test_questions_error")))
+        .finally(() => setLoading(false));
     }
-  }, [lang, show, selectedTest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const loadTests = async () => {
     setLoading(true);

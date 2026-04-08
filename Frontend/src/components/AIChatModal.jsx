@@ -151,7 +151,7 @@ const AIChatModal = ({ show, onHide, journalHistory: initialJournalHistory, test
             <div className="input-container">
               <Form.Group className="mb-0">
                 <div className="input-wrapper">
-                  <Form.Control type="text" placeholder={t("ai_placeholder")} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyPress={(e) => e.key === "Enter" && handleSendMessage()} disabled={isLoading} />
+                  <Form.Control type="text" placeholder={t("ai_placeholder")} value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }} disabled={isLoading} />
                   <Button variant="primary" onClick={handleSendMessage} disabled={isLoading || inputValue.trim() === ""} className="send-button">&rarr;</Button>
                 </div>
               </Form.Group>

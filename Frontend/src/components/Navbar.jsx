@@ -17,12 +17,12 @@ const NavbarComponent = ({ onLoginClick, onSignUpClick, isLoggedIn, onLogoutClic
   };
 
   return (
-    <Navbar expand="lg" sticky="top" className="navbar-custom shadow-sm">
+    <Navbar expand="lg" expanded={expanded} onToggle={setExpanded} sticky="top" className="navbar-custom shadow-sm">
       <Container>
-        <Navbar.Brand href="#" className="fw-bold fs-5 brand-text" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+        <Navbar.Brand href="#" className="fw-bold fs-5 brand-text" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); setExpanded(false); }}>
           WellBeing
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" expanded={expanded.toString()} onClick={() => setExpanded(!expanded)} />
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mx-auto nav-links">
             <Nav.Link onClick={() => scrollToSection("materials")} className="nav-link-item">{t("nav_materials")}</Nav.Link>

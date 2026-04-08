@@ -170,6 +170,11 @@ class MaterialCreate(BaseModel):
     content: str
 
 
+class MaterialUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+
+
 class MaterialOut(BaseModel):
     id: int
     title: str
@@ -182,3 +187,35 @@ class MaterialOut(BaseModel):
 
 class MaterialsResponse(BaseModel):
     materials: List[MaterialOut]
+
+
+# --- ADMIN ---
+class AdminUserOut(BaseModel):
+    id: int
+    full_name: str
+    mail: str
+    role: str
+    journals_count: int = 0
+    test_results_count: int = 0
+    tests_created_count: int = 0
+    materials_count: int = 0
+
+
+class AdminUsersResponse(BaseModel):
+    users: List[AdminUserOut]
+
+
+class AdminStatsCounts(BaseModel):
+    users_total: int
+    users_workers: int
+    users_therapists: int
+    users_admins: int
+    tests_total: int
+    questions_total: int
+    test_results_total: int
+    journals_total: int
+    materials_total: int
+
+
+class AdminStatsResponse(BaseModel):
+    counts: AdminStatsCounts

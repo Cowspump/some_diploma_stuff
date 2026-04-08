@@ -25,20 +25,100 @@ const TherapistDashboard = ({ user, onLogout }) => {
   const [newTest, setNewTest] = useState({ title: "", description: "" });
   const [newQuestion, setNewQuestion] = useState({ text: "", options: [{ text: "", points: 0 }, { text: "", points: 0 }] });
 
+  // Materials state
+  const [materials, setMaterials] = useState([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+  const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
+  const [showEditMaterialModal, setShowEditMaterialModal] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState(null);
+  const [newMaterial, setNewMaterial] = useState({ title: "", content: "" });
+
   // Users state
   const [workers, setWorkers] = useState([]);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [workersLoading, setWorkersLoading] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => { loadTests(); }, [lang]);
   useEffect(() => {
     if (selectedTest) loadQuestions(selectedTest.id);
     else setQuestions([]);
-  }, [selectedTest]);
+  }, [selectedTest, lang]);
 
   useEffect(() => {
     if (activeView === "users") loadWorkers();
-  }, [activeView]);
+    if (activeView === "materials") loadMaterials();
+  }, [activeView, lang]);
+
+  const loadMaterials = async () => {
+    setMaterialsLoading(true);
+    try {
+      let endpoint = "/materials";
+      if (lang && lang !== "ru") {
+        endpoint += `?lang=${lang}`;
+      }
+      const res = await apiService.get(endpoint);
+      setMaterials(res.materials || []);
+    } catch {
+      setError(t("therapist_materials_load_error"));
+    } finally {
+      setMaterialsLoading(false);
+    }
+  };
+
+  const handleCreateMaterial = async () => {
+    if (!newMaterial.title.trim() || !newMaterial.content.trim()) return;
+    setLoading(true);
+    try {
+      await apiService.post("/materials", newMaterial);
+      setSuccess(`${t("therapist_material_created")} ${t("therapist_translation_hint")}`);
+      setShowAddMaterialModal(false);
+      setNewMaterial({ title: "", content: "" });
+      await loadMaterials();
+    } catch (err) {
+      setError(err.message || "Error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMaterial = async (materialId) => {
+    if (!window.confirm(t("therapist_confirm_delete_material"))) return;
+    setLoading(true);
+    try {
+      await apiService.delete(`/materials/${materialId}`);
+      setSuccess(t("therapist_material_deleted"));
+      await loadMaterials();
+    } catch (err) {
+      setError(err.message || "Error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditMaterial = (m) => {
+    setEditingMaterial({ id: m.id, title: m.title, content: m.content });
+    setShowEditMaterialModal(true);
+  };
+
+  const handleEditMaterial = async () => {
+    if (!editingMaterial || !editingMaterial.title.trim() || !editingMaterial.content.trim()) return;
+    setLoading(true);
+    try {
+      await apiService.put(`/materials/${editingMaterial.id}`, {
+        title: editingMaterial.title,
+        content: editingMaterial.content,
+      });
+      setSuccess(`${t("therapist_material_updated")} ${t("therapist_translation_hint")}`);
+      setShowEditMaterialModal(false);
+      setEditingMaterial(null);
+      await loadMaterials();
+    } catch (err) {
+      setError(err.message || "Error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadTests = async () => {
     setLoading(true);
@@ -53,8 +133,13 @@ const TherapistDashboard = ({ user, onLogout }) => {
   const loadWorkers = async () => {
     setWorkersLoading(true);
     try {
-      const data = await apiService.get("/therapist/workers");
-      setWorkers(data.workers || []);
+      const data = await apiService.get(`/therapist/workers?lang=${encodeURIComponent(lang)}`);
+      const list = data.workers || [];
+      setWorkers(list);
+      if (selectedWorker) {
+        const updated = list.find(w => w.id === selectedWorker.id);
+        if (updated) setSelectedWorker(updated);
+      }
     } catch {
       setError(t("therapist_users_load_error"));
     } finally {
@@ -62,21 +147,16 @@ const TherapistDashboard = ({ user, onLogout }) => {
     }
   };
 
-  const handleDeleteWorker = async (worker) => {
-    if (!worker?.id) return;
-    if (!window.confirm(t("therapist_confirm_delete_user"))) return;
-    setLoading(true);
-    setError("");
-    setSuccess("");
+  const handleRegenerateSummary = async (workerId) => {
+    setRegenerating(true);
     try {
-      await apiService.delete(`/admin/user/${worker.id}`);
-      setSuccess(t("therapist_user_deleted"));
-      setSelectedWorker(null);
-      await loadWorkers();
-    } catch (err) {
-      setError(err?.message || "Error");
+      await apiService.post(`/therapist/worker/${workerId}/regenerate-summary`);
+      setSuccess(t("therapist_ai_regenerating"));
+      setTimeout(() => loadWorkers(), 5000);
+    } catch {
+      setError(t("therapist_ai_regenerate_error"));
     } finally {
-      setLoading(false);
+      setRegenerating(false);
     }
   };
 
@@ -88,7 +168,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
     setLoading(true);
     try {
       await createTest(newTest);
-      setSuccess(t("therapist_test_created"));
+      setSuccess(`${t("therapist_test_created")} ${t("therapist_translation_hint")}`);
       setShowAddTestModal(false);
       setNewTest({ title: "", description: "" });
       await loadTests();
@@ -121,7 +201,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
     setLoading(true);
     try {
       await addQuestion({ ...newQuestion, test_id: selectedTest?.id || null });
-      setSuccess(t("therapist_q_added"));
+      setSuccess(`${t("therapist_q_added")} ${t("therapist_translation_hint")}`);
       setShowAddQuestionModal(false);
       setNewQuestion({ text: "", options: [{ text: "", points: 0 }, { text: "", points: 0 }] });
       if (selectedTest) await loadQuestions(selectedTest.id);
@@ -215,6 +295,43 @@ const TherapistDashboard = ({ user, onLogout }) => {
     return "#28a745";
   };
 
+  const renderAiSummary = (text) => {
+    if (!text) return null;
+    const lines = text.split('\n').filter(l => l.trim());
+    return lines.map((line, idx) => {
+      const trimmed = line.trim();
+      const boldMatch = trimmed.match(/^\*\*(.+?)\*\*:?\s*(.*)/);
+      if (boldMatch) {
+        return (
+          <div key={idx} className="ai-summary-section">
+            <strong>{boldMatch[1]}</strong>
+            {boldMatch[2] && <span> {boldMatch[2]}</span>}
+          </div>
+        );
+      }
+      if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+        const content = trimmed.slice(2);
+        const innerBold = content.match(/^\*\*(.+?)\*\*:?\s*(.*)/);
+        if (innerBold) {
+          return (
+            <div key={idx} className="ai-summary-bullet">
+              <span className="ai-bullet-dot"></span>
+              <div><strong>{innerBold[1]}</strong>{innerBold[2] && `: ${innerBold[2]}`}</div>
+            </div>
+          );
+        }
+        return (
+          <div key={idx} className="ai-summary-bullet">
+            <span className="ai-bullet-dot"></span>
+            <span>{content}</span>
+          </div>
+        );
+      }
+      if (!trimmed) return null;
+      return <p key={idx} className="ai-summary-text">{trimmed}</p>;
+    });
+  };
+
   const getLocalizedTestTitle = (result) => {
     const id = result?.test_id;
     const fromList = id != null ? testsById.get(id)?.title : undefined;
@@ -259,6 +376,9 @@ const TherapistDashboard = ({ user, onLogout }) => {
           </button>
           <button className={`dashboard-tab ${activeView === "users" ? "active" : ""}`} onClick={() => setActiveView("users")}>
             {t("therapist_tab_users")}
+          </button>
+          <button className={`dashboard-tab ${activeView === "materials" ? "active" : ""}`} onClick={() => setActiveView("materials")}>
+            {t("therapist_tab_materials")}
           </button>
         </div>
 
@@ -507,51 +627,58 @@ const TherapistDashboard = ({ user, onLogout }) => {
                               {t("therapist_user_journals")}: <strong style={{ color: "#00cec9" }}>{selectedWorker.journals_count}</strong>
                             </span>
                           </div>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDeleteWorker(selectedWorker)}
-                            disabled={loading}
-                          >
-                            {t("therapist_delete_user")}
-                          </Button>
                         </div>
                         <div className="d-flex gap-3 mt-2">
                           {/* spacing kept for layout; detailed analytics below */}
                         </div>
                       </div>
 
-                      {/* Extended analytics */}
-                      <div className="mb-3">
-                        <h6 className="mb-2">{t("therapist_user_mood")}</h6>
-                        {Array.isArray(selectedWorker.journal_scores) && selectedWorker.journal_scores.length > 0 ? (
-                          <>
-                            <div style={{ color: "#a1a1b5", fontSize: "0.85rem" }} className="mb-2">
-                              {(() => {
-                                const trend = computeMoodTrend(selectedWorker.journal_scores);
-                                if (!trend) return "—";
-                                const arrow = trend.delta > 0 ? "↑" : trend.delta < 0 ? "↓" : "→";
-                                return `${t("therapist_user_mood_trend")}: ${arrow} (${trend.first} → ${trend.last}, Δ ${trend.delta})`;
-                              })()}
+                      {/* AI Summary - primary analysis card */}
+                      <div className="ai-summary-card mb-4">
+                        <div className="ai-summary-header">
+                          <div className="ai-summary-icon">🧠</div>
+                          <div className="flex-grow-1">
+                            <h6 className="mb-0">{t("therapist_user_ai_summary")}</h6>
+                            <small className="ai-summary-subtitle">{t("therapist_ai_summary_sub")}</small>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="ai-regenerate-btn"
+                            onClick={() => handleRegenerateSummary(selectedWorker.id)}
+                            disabled={regenerating}
+                          >
+                            {regenerating ? "..." : "↻"} {t("therapist_ai_regenerate")}
+                          </Button>
+                        </div>
+                        <div className="ai-summary-body">
+                          {selectedWorker.ai_summary ? (
+                            <div className="ai-summary-content">
+                              {renderAiSummary(selectedWorker.ai_summary)}
                             </div>
-                            <div style={{ maxHeight: 160, overflow: "auto", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 12 }}>
-                              {[...selectedWorker.journal_scores]
-                                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                                .slice(0, 14)
-                                .map((js, idx) => (
-                                  <div key={`${js.date}-${idx}`} className="d-flex justify-content-between" style={{ padding: "4px 0", borderBottom: "1px dashed rgba(255,255,255,0.06)" }}>
-                                    <span style={{ color: "#a1a1b5", fontSize: "0.85rem" }}>{formatDate(js.date)}</span>
-                                    <strong style={{ color: "#00cec9" }}>{js.score}/5</strong>
-                                  </div>
-                                ))}
+                          ) : (
+                            <div className="ai-summary-empty">
+                              <span className="ai-summary-empty-icon">📋</span>
+                              <p>{t("therapist_user_no_summary")}</p>
                             </div>
-                          </>
-                        ) : (
-                          <div className="text-muted" style={{ fontSize: "0.9rem" }}>{t("analytics_no_mood")}</div>
-                        )}
+                          )}
+                        </div>
+                        {Array.isArray(selectedWorker.journal_scores) && selectedWorker.journal_scores.length >= 2 && (() => {
+                          const trend = computeMoodTrend(selectedWorker.journal_scores);
+                          if (!trend) return null;
+                          const isUp = trend.delta > 0;
+                          const isDown = trend.delta < 0;
+                          return (
+                            <div className="ai-summary-trend">
+                              <span className={`trend-arrow ${isUp ? "up" : isDown ? "down" : "flat"}`}>
+                                {isUp ? "↑" : isDown ? "↓" : "→"}
+                              </span>
+                              <span>{t("therapist_user_mood_trend")}: {trend.first} → {trend.last} (Δ{trend.delta > 0 ? "+" : ""}{trend.delta})</span>
+                            </div>
+                          );
+                        })()}
                       </div>
 
-                      {/* Analytics like main page (charts + burnout) */}
+                      {/* Charts + Burnout */}
                       {(() => {
                         const { testSeries, moodSeries, burnout } = buildWorkerAnalytics(selectedWorker);
                         const noData = testSeries.length === 0 && moodSeries.length === 0;
@@ -565,7 +692,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
                                   {testSeries.length === 0 ? (
                                     <div className="text-muted">{t("analytics_no_tests")}</div>
                                   ) : (
-                                    <ResponsiveContainer width="100%" height={240}>
+                                    <ResponsiveContainer width="100%" height={200}>
                                       <LineChart data={testSeries}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                         <XAxis dataKey="name" stroke="#999" />
@@ -583,7 +710,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
                                   {moodSeries.length === 0 ? (
                                     <div className="text-muted">{t("analytics_no_mood")}</div>
                                   ) : (
-                                    <ResponsiveContainer width="100%" height={240}>
+                                    <ResponsiveContainer width="100%" height={200}>
                                       <BarChart data={moodSeries}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                         <XAxis dataKey="day" stroke="#999" />
@@ -603,7 +730,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
                                 <strong style={{ color: getBurnoutColor(burnout) }}>{burnout}%</strong>
                               </div>
                               <div style={{ height: 10, borderRadius: 999, background: "#e5e7eb", overflow: "hidden" }}>
-                                <div style={{ width: `${burnout}%`, height: "100%", background: getBurnoutColor(burnout) }} />
+                                <div style={{ width: `${burnout}%`, height: "100%", background: getBurnoutColor(burnout), transition: "width 0.5s ease" }} />
                               </div>
                               <div className="text-muted mt-2" style={{ fontSize: "0.9rem" }}>
                                 {getBurnoutLabel(burnout)}
@@ -612,17 +739,6 @@ const TherapistDashboard = ({ user, onLogout }) => {
                           </div>
                         );
                       })()}
-
-                      <div className="mb-4">
-                        <h6 className="mb-2">{t("therapist_user_ai_summary")}</h6>
-                        {selectedWorker.ai_summary ? (
-                          <div style={{ whiteSpace: "pre-wrap", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: 12 }}>
-                            {selectedWorker.ai_summary}
-                          </div>
-                        ) : (
-                          <div className="text-muted" style={{ fontSize: "0.9rem" }}>{t("therapist_user_no_summary")}</div>
-                        )}
-                      </div>
 
                       <div>
                         {selectedWorker.test_results.length === 0 ? (
@@ -658,6 +774,72 @@ const TherapistDashboard = ({ user, onLogout }) => {
                 </div>
               </Col>
             </Row>
+          </>
+        )}
+
+        {activeView === "materials" && (
+          <>
+            <div className="stats-row">
+              <div className="stat-card">
+                <div className="stat-icon purple">📘</div>
+                <div>
+                  <div className="stat-value">{materials.length}</div>
+                  <div className="stat-label">{t("therapist_materials_count")}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="test-list-panel">
+              <div className="test-list-header">
+                <h5>{t("therapist_tab_materials")}</h5>
+                <Button className="btn-add" size="sm" onClick={() => setShowAddMaterialModal(true)}>
+                  {t("therapist_new_material")}
+                </Button>
+              </div>
+              <div className="test-list-body">
+                {materialsLoading ? (
+                  <div className="empty-state">
+                    <div className="spinner-border spinner-border-sm" role="status" />
+                  </div>
+                ) : materials.length === 0 ? (
+                  <div className="empty-state">
+                    <div className="empty-state-icon">📘</div>
+                    <h5>{t("therapist_no_materials")}</h5>
+                  </div>
+                ) : (
+                  materials.map((m) => (
+                    <div key={m.id} className="test-item">
+                      <div className="test-item-info" onClick={() => openEditMaterial(m)} style={{ cursor: "pointer" }}>
+                        <h6>{m.title}</h6>
+                        <div className="test-meta">
+                          <span>{m.created_at ? new Date(m.created_at).toLocaleDateString() : ""}</span>
+                        </div>
+                      </div>
+                      <div className="d-flex gap-1">
+                        <Button
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => openEditMaterial(m)}
+                          disabled={loading}
+                          style={{ borderRadius: "50%", width: "32px", height: "32px", padding: 0 }}
+                        >
+                          ✎
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="delete-btn"
+                          onClick={() => handleDeleteMaterial(m.id)}
+                          disabled={loading}
+                        >
+                          &times;
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </>
         )}
       </Container>
@@ -719,6 +901,84 @@ const TherapistDashboard = ({ user, onLogout }) => {
         <Modal.Footer style={{ borderTop: "none" }}>
           <Button variant="secondary" onClick={() => setShowAddQuestionModal(false)} disabled={loading} style={{ borderRadius: "10px" }}>{t("therapist_cancel")}</Button>
           <Button className="btn-gradient" onClick={handleSubmitQuestion} disabled={loading}>{loading ? t("therapist_saving") : t("therapist_save")}</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Add Material Modal */}
+      <Modal show={showAddMaterialModal} onHide={() => setShowAddMaterialModal(false)} centered size="lg">
+        <Modal.Header closeButton><Modal.Title>{t("materials_add_title")}</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">{t("materials_field_title")}</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder={t("materials_field_title")}
+                value={newMaterial.title}
+                onChange={(e) => setNewMaterial({ ...newMaterial, title: e.target.value })}
+                style={{ borderRadius: "10px" }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label className="fw-semibold">{t("materials_field_content")}</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={8}
+                placeholder={t("materials_field_content")}
+                value={newMaterial.content}
+                onChange={(e) => setNewMaterial({ ...newMaterial, content: e.target.value })}
+                style={{ borderRadius: "10px" }}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer style={{ borderTop: "none" }}>
+          <Button variant="secondary" onClick={() => setShowAddMaterialModal(false)} style={{ borderRadius: "10px" }}>{t("therapist_cancel")}</Button>
+          <Button
+            className="btn-gradient"
+            onClick={handleCreateMaterial}
+            disabled={loading || !newMaterial.title.trim() || !newMaterial.content.trim()}
+          >
+            {loading ? t("therapist_saving") : t("materials_publish")}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Edit Material Modal */}
+      <Modal show={showEditMaterialModal} onHide={() => setShowEditMaterialModal(false)} centered size="lg">
+        <Modal.Header closeButton><Modal.Title>{t("therapist_edit_material")}</Modal.Title></Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">{t("materials_field_title")}</Form.Label>
+              <Form.Control
+                type="text"
+                value={editingMaterial?.title || ""}
+                onChange={(e) => setEditingMaterial({ ...editingMaterial, title: e.target.value })}
+                style={{ borderRadius: "10px" }}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label className="fw-semibold">{t("materials_field_content")}</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={8}
+                value={editingMaterial?.content || ""}
+                onChange={(e) => setEditingMaterial({ ...editingMaterial, content: e.target.value })}
+                style={{ borderRadius: "10px" }}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer style={{ borderTop: "none" }}>
+          <Button variant="secondary" onClick={() => setShowEditMaterialModal(false)} style={{ borderRadius: "10px" }}>{t("therapist_cancel")}</Button>
+          <Button
+            className="btn-gradient"
+            onClick={handleEditMaterial}
+            disabled={loading || !editingMaterial?.title?.trim() || !editingMaterial?.content?.trim()}
+          >
+            {loading ? t("therapist_saving") : t("therapist_save")}
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

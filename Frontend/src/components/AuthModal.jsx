@@ -161,7 +161,7 @@ const AuthModal = ({ show, handleClose, initialTab = "login", onLoginSuccess }) 
               <Form onSubmit={handleLogin} className="mt-4">
                 <Form.Group className="mb-3">
                   <Form.Label>{t("auth_email")}</Form.Label>
-                  <Form.Control type="email" name="email" placeholder={t("auth_email_placeholder")} value={loginData.email} onChange={handleLoginChange} required disabled={loading} />
+                  <Form.Control type="text" name="email" placeholder={t("auth_email_placeholder")} value={loginData.email} onChange={handleLoginChange} required disabled={loading} />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>{t("auth_password")}</Form.Label>

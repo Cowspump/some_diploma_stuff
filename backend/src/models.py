@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, JSON
 from sqlalchemy.orm import relationship
 from database import Base
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class UserRole(str, enum.Enum):
@@ -28,7 +28,7 @@ class Journal(Base):
     id = Column(Integer, primary_key=True, index=True)
     wellbeing_score = Column(Integer)
     note_text = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="journals")
 
@@ -38,7 +38,7 @@ class Test(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     therapist_id = Column(Integer, ForeignKey("users.id"))
 
     questions = relationship("Question", back_populates="test", cascade="all, delete-orphan")
@@ -59,7 +59,7 @@ class TestResult(Base):
     __tablename__ = "test_results"
     id = Column(Integer, primary_key=True)
     total_score = Column(Integer)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = Column(Integer, ForeignKey("users.id"))
     test_id = Column(Integer, ForeignKey("tests.id"), nullable=True)
 
@@ -73,7 +73,7 @@ class AILog(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     request = Column(String)
     response = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class AISummary(Base):
@@ -82,7 +82,17 @@ class AISummary(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     summary_text = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class AISummaryTranslation(Base):
+    __tablename__ = "ai_summary_translations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    lang = Column(String, nullable=False)  # ru/en/zh
+    summary_text = Column(String, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class QuestionTranslation(Base):
@@ -111,5 +121,15 @@ class Material(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     author_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+
+class MaterialTranslation(Base):
+    __tablename__ = "material_translations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
+    lang = Column(String, nullable=False)
+    translated_title = Column(String, nullable=False)
+    translated_content = Column(String, nullable=False)
