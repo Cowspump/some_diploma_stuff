@@ -22,7 +22,8 @@
       "Bash(curl -s -X POST http://localhost:8000/token -d \"username=ivan@test.com&password=password123\")",
       "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f'  {q[\\\\\"id\\\\\"]}: {q[\\\\\"text\\\\\"]}'\\) for q in data['questions'][:2]]\")",
       "Bash(python3 -c \"import sys,json; [print\\(f'  {t[\\\\\"title\\\\\"]}'\\) for t in json.load\\(sys.stdin\\)['tests']]\")",
-      "Bash(pkill -f \"uvicorn main:app\")"
+      "Bash(pkill -f \"uvicorn main:app\")",
+      "Bash(python -c ':*)"
     ]
   }
 }
