@@ -392,6 +392,9 @@ def delete_journal(journal_id: int, user: models.User = Depends(auth.get_current
     if journal.user_id != user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this journal entry")
 
+    db.query(models.JournalTranslation).filter(models.JournalTranslation.journal_id == journal_id).delete(
+        synchronize_session=False
+    )
     db.delete(journal)
     db.commit()
     return {"message": "Journal entry deleted"}
@@ -474,7 +477,17 @@ def delete_test(
     test = db.query(models.Test).filter(models.Test.id == test_id).first()
     if not test:
         raise HTTPException(status_code=404, detail="Тест не найден")
+    if test.therapist_id != user.id:
+        raise HTTPException(status_code=403, detail="Можно удалять только свои тесты")
 
+    db.query(models.TestResult).filter(models.TestResult.test_id == test_id).delete(synchronize_session=False)
+    question_ids = [qid for (qid,) in db.query(models.Question.id).filter(models.Question.test_id == test_id).all()]
+    if question_ids:
+        db.query(models.QuestionTranslation).filter(
+            models.QuestionTranslation.question_id.in_(question_ids)
+        ).delete(synchronize_session=False)
+    db.query(models.TestTranslation).filter(models.TestTranslation.test_id == test_id).delete(synchronize_session=False)
+    db.query(models.Question).filter(models.Question.test_id == test_id).delete(synchronize_session=False)
     db.delete(test)
     db.commit()
     return {"message": "Тест удалён"}
@@ -567,7 +580,14 @@ def delete_question(
     question = db.query(models.Question).filter(models.Question.id == question_id).first()
     if not question:
         raise HTTPException(status_code=404, detail="Вопрос не найден")
+    if question.test_id is not None:
+        owning = db.query(models.Test).filter(models.Test.id == question.test_id).first()
+        if not owning or owning.therapist_id != user.id:
+            raise HTTPException(status_code=403, detail="Можно удалять вопросы только из своих тестов")
 
+    db.query(models.QuestionTranslation).filter(
+        models.QuestionTranslation.question_id == question_id
+    ).delete(synchronize_session=False)
     db.delete(question)
     db.commit()
     return {"message": "Вопрос успешно удалён"}
@@ -766,12 +786,19 @@ def delete_user(
     if target.id == user.id:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
 
-    # Cascade delete user data
-    db.query(models.Journal).filter(models.Journal.user_id == user_id).delete()
-    db.query(models.TestResult).filter(models.TestResult.user_id == user_id).delete()
-    db.query(models.AILog).filter(models.AILog.user_id == user_id).delete()
-    db.query(models.AISummary).filter(models.AISummary.user_id == user_id).delete()
-    db.query(models.AISummaryTranslation).filter(models.AISummaryTranslation.user_id == user_id).delete()
+    # Cascade delete user data (child rows with FKs must go first)
+    journal_ids = [jid for (jid,) in db.query(models.Journal.id).filter(models.Journal.user_id == user_id).all()]
+    if journal_ids:
+        db.query(models.JournalTranslation).filter(
+            models.JournalTranslation.journal_id.in_(journal_ids)
+        ).delete(synchronize_session=False)
+    db.query(models.Journal).filter(models.Journal.user_id == user_id).delete(synchronize_session=False)
+    db.query(models.TestResult).filter(models.TestResult.user_id == user_id).delete(synchronize_session=False)
+    db.query(models.AILog).filter(models.AILog.user_id == user_id).delete(synchronize_session=False)
+    db.query(models.AISummary).filter(models.AISummary.user_id == user_id).delete(synchronize_session=False)
+    db.query(models.AISummaryTranslation).filter(
+        models.AISummaryTranslation.user_id == user_id
+    ).delete(synchronize_session=False)
     db.delete(target)
     db.commit()
     return {"message": "User deleted"}
@@ -855,6 +882,7 @@ def admin_delete_therapist(
     # Collect tests/questions created by therapist
     test_ids = [t.id for t in db.query(models.Test.id).filter(models.Test.therapist_id == therapist_id).all()]
     if test_ids:
+        db.query(models.TestResult).filter(models.TestResult.test_id.in_(test_ids)).delete(synchronize_session=False)
         question_ids = [q.id for q in db.query(models.Question.id).filter(models.Question.test_id.in_(test_ids)).all()]
         if question_ids:
             db.query(models.QuestionTranslation).filter(models.QuestionTranslation.question_id.in_(question_ids)).delete(synchronize_session=False)
@@ -864,10 +892,20 @@ def admin_delete_therapist(
         db.query(models.Question).filter(models.Question.test_id.in_(test_ids)).delete(synchronize_session=False)
         db.query(models.Test).filter(models.Test.id.in_(test_ids)).delete(synchronize_session=False)
 
-    # Delete therapist's materials
+    # Delete therapist's materials (translations reference materials)
+    material_ids = [mid for (mid,) in db.query(models.Material.id).filter(models.Material.author_id == therapist_id).all()]
+    if material_ids:
+        db.query(models.MaterialTranslation).filter(
+            models.MaterialTranslation.material_id.in_(material_ids)
+        ).delete(synchronize_session=False)
     db.query(models.Material).filter(models.Material.author_id == therapist_id).delete(synchronize_session=False)
 
     # Delete therapist's own journals/results/logs/summaries
+    t_journal_ids = [jid for (jid,) in db.query(models.Journal.id).filter(models.Journal.user_id == therapist_id).all()]
+    if t_journal_ids:
+        db.query(models.JournalTranslation).filter(
+            models.JournalTranslation.journal_id.in_(t_journal_ids)
+        ).delete(synchronize_session=False)
     db.query(models.Journal).filter(models.Journal.user_id == therapist_id).delete(synchronize_session=False)
     db.query(models.TestResult).filter(models.TestResult.user_id == therapist_id).delete(synchronize_session=False)
     db.query(models.AILog).filter(models.AILog.user_id == therapist_id).delete(synchronize_session=False)
@@ -926,6 +964,9 @@ def admin_delete_material(
     if not m:
         raise HTTPException(status_code=404, detail="Material not found")
 
+    db.query(models.MaterialTranslation).filter(models.MaterialTranslation.material_id == material_id).delete(
+        synchronize_session=False
+    )
     db.delete(m)
     db.commit()
     return {"message": "Material deleted"}

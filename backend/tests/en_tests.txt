@@ -804,7 +804,9 @@ This test is based on the structure of the NASA Load Index (NASA-TLX) and is use
 Mental stress
 
 A. The task is very difficult, requires high concentration and intense thinking, it is difficult to cope (0 points)
-B. The task is quite complex and requires considerable thought (1 point). The task has a certain complexity, but it can be handled (2 points). The task is simple and does not require much effort (3 points)
+B. The task is quite complex and requires considerable thought (1 point)
+C. The task has a certain complexity, but it can be handled (2 points)
+D. The task is simple and does not require much effort (3 points)
 
 
  
@@ -839,7 +841,7 @@ D. I am satisfied with my result (3 points)
  
 Level of effort
 
-A. I have put in(a) a lot of effort, but it was still hard (0 points)
+A. I have put in a lot of effort, but it was still hard (0 points)
 B. It took a lot of effort (1 point)
 C. It took some effort (2 points)
 D. The task was easy (3 points)

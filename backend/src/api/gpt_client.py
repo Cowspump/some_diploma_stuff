@@ -476,31 +476,59 @@ def ask_ai_assistant(user_id: int, prompt: str, db: Session, chat_history: list 
 
 def explain_question(question_text: str, options: list, lang: str = "ru") -> dict:
     try:
+        code = (lang or "ru").strip().lower()
+        if code not in ("ru", "en", "zh"):
+            code = "ru"
+
         options_text = "\n".join([f"- {opt['text']} ({opt['points']} points)" for opt in options])
 
-        lang_instructions = {
-            "ru": "Отвечай на русском языке.",
-            "zh": "请用中文回答。",
+        system_by_lang = {
+            "ru": "Ты психолог-консультант. Помогаешь понимать вопросы психологических тестов. Весь ответ — только на русском языке, без вставок на других языках.",
+            "en": "You are a psychological consultant helping users understand psychological test questions. Your entire reply must be in English only, with no other languages.",
+            "zh": "你是心理咨询助手，帮助用户理解心理测评题目。全文必须只用中文撰写，不要夹杂其他语言。",
         }
-        lang_instruction = lang_instructions.get(lang, "Отвечай на русском языке.")
 
-        prompt = f"""Explain this psychological question in simple terms.
+        prompt_by_lang = {
+            "ru": f"""Объясни эту психологическую формулировку простым языком.
+
+Вопрос: {question_text}
+
+Варианты ответа:
+{options_text}
+
+Дай краткое объяснение (3–5 предложений):
+— что именно оценивает этот вопрос;
+— как понимать варианты ответов;
+— совет для честного ответа.""",
+            "en": f"""Explain this psychological test question in plain language.
 
 Question: {question_text}
 
 Answer options:
 {options_text}
 
-Give a brief explanation (3-5 sentences):
-- What this question evaluates
-- How to understand the answer options
-- Advice for honest answering"""
+Give a brief explanation (3–5 sentences):
+— what this question is measuring;
+— how to interpret the answer options;
+— advice for answering honestly.""",
+            "zh": f"""请用通俗易懂的语言解释这道心理测评题目。
+
+题目：{question_text}
+
+选项：
+{options_text}
+
+请写简明说明（3–5句）：
+— 本题在评估什么；
+— 如何理解各个选项；
+— 真诚作答的建议。""",
+        }
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": f"You are a psychological consultant. You help users understand psychological test questions. {lang_instruction}"},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": system_by_lang[code]},
+                {"role": "user", "content": prompt_by_lang[code]},
             ],
             max_tokens=400,
             temperature=0.7
