@@ -151,3 +151,11 @@ class MaterialTranslation(Base):
     lang = Column(String, nullable=False)
     translated_title = Column(String, nullable=False)
     translated_content = Column(String, nullable=False)
+
+
+class SeedState(Base):
+    __tablename__ = "seed_state"
+
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

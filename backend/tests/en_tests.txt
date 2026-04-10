@@ -1,887 +1,856 @@
-1) НазВание: Depression Status Self-assessment Scale
+TEST NUMBER 1
 
-Описание: This test is based on the structure of the Beck Depression Scale and is used to assess your emotional state, energy level and psychological changes in the last two weeks.Please choose the most suitable option according to your true feelings. The results are only for reference and self-understanding.
-
-Вопрос, ответ и рядом балл:
-Please choose the one that best suits your situation based on your status in the last two weeks：
-A. I continue to feel extremely sad or desperate, almost unable to relieve (0 points)
+ 
+The scale of self-assessment of a depressive state
+ 
+ 
+This test is based on the structure of the Beck Depression Scale and is used to assess your emotional state, energy levels, and psychological changes over the past two weeks. Please choose the option that most accurately reflects your real feelings. The results are intended for reference and self-understanding only.
+ 
+—————————————-
+ 
+ 
+Please choose one option that best suits your condition over the last two weeks.:
+ 
+A. I constantly feel very sad or desperate, I can hardly alleviate it (0 points)
 B. I often feel sad (1 point)
-C. I occasionally feel depressed (2 points)
-D. My mood is basically stable (3 points)
-
+C. Sometimes I have a depressed mood (2 points)
+D. My emotional state is generally stable (3 points)
+ 
 ⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I have completely lost hope for the future (0 points)
-B. I am pessimistic about the future (1 point)
+B. I am quite pessimistic about the future (1 point)
 C. I have some worries about the future (2 points)
 D. I am confident in the future (3 points)
-
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I feel like I have completely failed (0 points)
-B. I feel that I am worse than others (1 point)
-C. I think I'm okay (2 points)
-D. I think I am valuable (3 points)
-
+A. I consider myself a complete loser (0 points)
+B. I consider myself worse than others (1 point)
+C. I consider myself okay (2 points)
+D. I consider myself a valuable person (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I am not interested in anything (0 points)
-B. I rarely feel happy (1 point)
-C. Happiness has decreased (2 points)
-D. I can still feel happy (3 points)
-
+A. I'm not interested in anything (0 points)
+B. I rarely experience joy (1 point)
+C. Joy has decreased (2 points)
+D. I can still feel joy (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I continue to feel strong guilt (0 points)
+A. I constantly feel a strong sense of guilt (0 points)
 B. I often feel guilty (1 point)
-C. I feel guilty occasionally (2 points)
-D. I have little or no guilt (3 points)
-
+C. Sometimes I feel guilty (2 points)
+D. I rarely or do not feel guilty at all (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I think I should be punished (0 points)
-B. I am worried that I will be punished (1 point)
-C. I feel a little bit like this (2 points)
-D. I don't feel this way (3 points)
-
+A. I feel like I should be punished (0 points)
+B. I worry that I might be punished (1 point)
+C. I sometimes have this feeling (2 points)
+D. I don't have that feeling (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks: A. I hate myself (0 points) B. I don't really like myself (1 point) C. I generally accept myself (2 points) D. I am satisfied with myself (3 points)
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
 
-A. I hate myself (0 points)
-B. I don't like myself very much (1 point)
-C. I can basically accept myself (2 points)
-D. I am satisfied with myself (3 points)
 
+
+
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I often blame myself severely (0 points)
+A. I often severely blame myself (0 points)
 B. I often blame myself (1 point)
-C. I sometimes blame myself (2 points)
+C. Sometimes I blame myself (2 points)
 D. I rarely blame myself (3 points)
-
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I have strong suicidal thoughts (0 points)
-B. I have had ideas but can't act (1 point)
-C. I occasionally think of (2 points)
-D. I have no such idea at all (3 points)
-
+A. I have strong thoughts of suicide (0 points)
+B. I have had such thoughts, but I will not act (1 point)
+C. Sometimes such thoughts appear (2 points)
+D. I do not have such thoughts at all thoughts (3 points)
+ 
 ⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I want to cry almost every day (0 points)
-B. I cry more easily than before (1 point)
-C. I cry occasionally (2 points)
-D. I basically don't cry (3 points)
+B. I started crying more often than before (1 point)
+C. Sometimes I cry (2 points)
+D. I hardly cry (3 points)
+ 
+⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
+A. I get annoyed or angry very easily (0 points)
+B. I am often annoyed (a) (1 point)
+C. Sometimes I get annoyed (2 points)
+D. My mood is stable (3 points)
+ 
+⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. I don't want to communicate with people at all (0 points)
+B. I have become(a) communicate less (1 point)
+C. Communication has decreased slightly (2 points)
+D. I maintain a normal level of communication (3 points)
+ 
+⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. It is almost impossible for me to make decisions (0 points)
+B. It is very difficult for me to make decisions (1 point)
+C. There are some difficulties (2 points)
+D. I make decisions normally (3 points)
+ 
+⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. I consider myself completely useless (0 points)
+B. I feel that my value is low (1 point)
+C. I partially accept myself (2 points)
+D. I consider myself a valuable person (3 points)
+ 
 ⸻
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I am very angry or irritable very easily (0 points)
-B. I am often irritable (1 point)
-C. I am occasionally irritable (2 points)
-D. I am emotionally stable (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I don't want to contact people at all (0 points)
-B. I reduce socializing (1 point)
-C. Socialization is slightly reduced (2 points)
-D. I keep socializing normally (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I can hardly make a decision (0 points)
-B. It's difficult to make a decision (1 point)
-C. A bit difficult (2 points)
-D. Normal decision-making (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I feel worthless (0 points)
-B. I feel that I am of low value (1 point)
-C. I have a certain recognition of myself (2 points)
-D. I think I am valuable (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I have no energy at all (0 points)
-B. I get tired easily (1 point)
-C. I am sometimes tired (2 points)
-D. My energy is normal (3 points)
-
+B. I get tired very quickly (1 point)
+C. Sometimes I feel tired (2 points)
+D. My energy level is normal (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. My sleep is severely abnormal (0 points)
-B. Poor sleep (1 point)
-C. There is a problem (2 points)
-D. Normal sleep (3 points)
-
+A. I have serious sleep problems (0 points)
+B. Sleep is bad (1 point)
+C. There are minor problems (2 points)
+D. Sleep is normal (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. My appetite is severely abnormal (0 points)
-B. Poor appetite (1 point)
-C. There is a change (2 points)
-D. Normal appetite (3 points)
-
+A. I have serious appetite problems (0 points)
+B. Appetite is poor (1 point)
+C. There are changes (2 points)
+D. Appetite is normal (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I am very worried about physical problems (0 points)
-B. Worry often (1 point)
-C. Worry occasionally (2 points)
-D. Don't worry (3 points)
-
+A. I worry a lot about my health (0 points)
+B. I worry a lot (1 point)
+C. Sometimes I worry (2 points)
+D. I don't worry (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I completely lost sexual interest (0 points)
-B. Significant decline (1 point)
-C. Slightly decreased (2 points)
-D. Normal (3 points)
-
+A. I have completely lost interest in sex (0 points)
+B. Interest has decreased significantly (1 point)
+C. Decreased slightly (2 points)
+D. Everything is fine (3 points)
+ 
 ⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I can't concentrate at all (0 points)
-B. Difficult to concentrate (1 point)
-C. Occasional difficulties (2 points)
-D. Normal concentration (3 points)
-
+B. It's very difficult for me to concentrate (1 point)
+C. Sometimes it's difficult (2 points)
+D. Concentration is normal (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I can hardly move or do things (0 points)
-B. It's very difficult to do things (1 point)
-C. A bit difficult (2 points)
+A. I can hardly do anything (0 points)
+B. It is very difficult for me to do anything (1 point)
+C. There are minor difficulties (2 points)
 D. I can act normally (3 points)
 
+TEST NUMBER 2
 
-
-
-
-2) НазВание: Occupational Burnout Assessment Scale
-
-Описание: This test is based on the Maslach Burnout Scale (MBI) structure and is used to assess your emotional state, stress level and risk of burnout during recent work or study.Please choose the most suitable option according to your true feelings. The results are only for reference and self-understanding.
-
-Вопросы, ответы, баллы
-
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel completely exhausted for a long time, almost every day (0 points)
-B. I often feel emotionally exhausted (1 point)
-C. I sometimes feel tired (2 points)
-D. I am energetic (3 points)
-
+ 
+Professional Burnout assessment Scale
+ 
+This test is based on the structure of the Maslach Professional Burnout Scale (MBI) and is used to assess your emotional state, stress level, and risk of professional burnout recently at work or school. Please choose the option that most accurately reflects your real feelings. The results are intended for reference and self-understanding only.
+ 
+__________
+ 
+Please choose one option that best suits your recent state of work or study.:
+ 
+A. I feel completely emotionally exhausted for a long time, almost every day (0 points)
+B. I often feel emotionally tired (1 point)
+C. Sometimes I feel tired (2 points)
+D. I am full of energy (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. Working every day makes me feel extremely tired (0 points)
-B. Often feel very tired after work (1 point)
-C. Sometimes feel tired (2 points)
-D. In good condition after work (3 points)
-
+A. Every working day makes me very tired (0 points)
+B. After work, I often feel very tired (1 point)
+C. Sometimes I feel tired (2 points)
+D. After work, I feel fine (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel strong pressure and even resist when I think of work (0 points)
-B. I often feel obvious pressure on work (1 point)
-C. I have a certain amount of pressure, but I can handle it (2 points)
-D. I can face work easily (3 points)
-
+A. Just thinking about work causes me severe stress or even rejection (0 points)
+B. I often experience noticeable stress due to work (1 point)
+C. I have stress, but I can I can handle it (2 points)
+D. I can handle the job easily (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel that I can no longer bear the current workload (0 points)
-B. I feel a heavy workload (1 point)
-C. Acceptable work burden (2 points)
-D. Normal workload (3 points)
-
+A. I feel that I can no longer withstand the current workload (0 points)
+B. I feel that the load is quite high (1 point)
+C. The load is generally acceptable (2 points)
+D. The load is normal (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel completely emptied of emotions and it is difficult to recover (0 points)
+A. I feel completely emotionally drained, it is difficult for me to recover (0 points)
 B. I often feel depressed (1 point)
-C. Occasionally feel this way (2 points)
-D. Mood is basically stable (3 points)
-
+C. Sometimes such feelings arise (2 points)
+D. The emotional state is generally stable (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel exhausted at work (0 points)
-B. Often feel insufficient energy (1 point)
-C. Occasional exhaustion (2 points)
-D. Sufficient energy (3 points)
-
+A. I feel completely exhausted at work (0 points)
+B. I often feel a lack of energy (1 point)
+C. Sometimes I feel tired (2 points)
+D. I have enough energy (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I am extremely tired and even resistant to work (0 points)
-B. I am obviously tired of work (1 point)
-C. Occasionally get tired (2 points)
-D. I still maintain interest in work (3 points)
-
+A. I have a strong aversion to work (0 points)
+B. I have a pronounced feeling of boredom and fatigue from work (1 point)
+C. Sometimes I feel bored (2 points)
+D. I still have an interest in work (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I find it very difficult to start working every day (0 points)
-B. I often procrastinate or don't want to start work (1 point)
-C. Sometimes procrastinate (2 points)
-D. I can start working normally (3 points)
-
+A. It is very difficult for me to start work every day (0 points)
+B. I often postpone starting work (1 point)
+C. Sometimes I postpone (2 points)
+D. I start work normally (3 points)
+ 
 ⸻
-
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. Work makes me feel emotionally broken or unbearable (0 points)
-B. Work puts a lot of pressure on me (1 point)
-C. There is a certain pressure (2 points)
-D. The working pressure is within the controllable range (3 points)
-————-
-
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I became indifferent or even indifferent to others (0 points)
-B. I am sometimes impatient with others (1 point)
-C. Occasionally show indifference (2 points)
-D. I maintain a normal attitude towards others (3 points)
-
+ 
+Please choose one option that best suits your recent state of work or study.:
+ 
+A. Work causes me an emotional breakdown or unbearable stress (0 points)
+B. Work causes me severe stress (1 point)
+C. There is some stress (2 points)
+D. The stress level is controlled (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your state of work or study lately:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I don't care about other people's problems at all (0 points)
-B. I don't want to care about others (1 point)
-C. Sometimes alienate others (2 points)
-D. I am willing to understand and care about others (3 points)
-
+A. I have become cold and indifferent to other people (0 points)
+B. Sometimes I get annoyed with others (1 point)
+C. Sometimes I behave aloof (2 points)
+D. I maintain a normal attitude towards people (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
+A. I am completely indifferent to other people's problems (0 points)
+B. I don't particularly want to take care of others (1 point)
+C. Sometimes I distance myself from people (2 points)
+D. I am ready to understand and Support others (3 points)
+ 
+⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-A. I treat others as task objects instead of people (0 points)
-B. Sometimes I look at others like this (1 point)
-C. This happens occasionally (2 points)
+A. I perceive people as tasks, not as individuals (0 points)
+B. Sometimes I think this way (1 point)
+C. This rarely happens (2 points)
 D. I always respect others (3 points)
-
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I obviously lack patience with others (0 points)
-B. I am easily irritable or impatient (1 point)
-C. Occasionally like this (2 points)
-D. I am usually more patient (3 points)
-
+A. I am clearly not patient with others (0 points)
+B. I get annoyed easily (1 point)
+C. Sometimes this happens (2 points)
+D. I am usually patient (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I am unwilling to communicate or communicate with others (0 points)
-B. I reduced communication with others (1 point)
-C. Occasionally avoid communication (2 points)
-D. I am willing to take the initiative to communicate (3 points)
-
+A. I don't want to communicate with others (0 points)
+B. I have become(a) Communicate less (1 point)
+C. Sometimes I avoid communication (2 points)
+D. I am ready to communicate (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I have obvious negative emotions about work-related people (0 points)
-B. Often have negative emotions (1 point)
-C. Occasional appearance (2 points)
-D. Mood is basically stable (3 points)
-
+A. I have strong negative emotions towards people at work (0 points)
+B. I often experience negative emotions (1 point)
+C. Sometimes this happens (2 points)
+D. My emotional state is stable (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I think getting along with people makes me very tired (0 points)
-B. I often feel social fatigue (1 point)
-C. Occasionally I feel this way (2 points)
-D. I can get along well with others (3 points)
-
-—————-
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel that I have achieved nothing at work (0 points)
-B. My sense of accomplishment is low (1 point)
-C. I have a certain sense of accomplishment (2 points)
-D. I have a strong sense of accomplishment (3 points)
-
+A. Communicating with people drains me a lot (0 points)
+B. I often feel socially tired (1 point)
+C. Sometimes I feel it (2 points)
+D. I interact normally with people (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I feel that I am not capable enough to be competent for the job (0 points)
-B. I am not very confident in myself (1 point)
-C. I can basically do it (2 points)
-D. I have confidence in my abilities (3 points)
-
+A. I don't feel any achievement at work (0 points)
+B. I have a low sense of achievement (1 point)
+C. I have some sense of achievement (2 points)
+D. I feel a strong sense of achievement (3 points)
+ 
 ⸻
-
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I think my work is meaningless or valuable (0 points)
-B. I think the sense of value is low (1 point)
-C. I think work has a certain value (2 points)
-D. I think work is important (3 points)
-
+ 
+Please choose one option that best suits your recent state of work or study.:
+ 
+A. I feel like I'm not doing a good job (0 points)
+B. I'm not confident in my abilities (1 point)
+C. I'm generally doing well (2 points)
+D. I'm confident in my abilities (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
+A. I believe that my work does not make sense (0 points)
+B. My sense of value is low (1 point)
+C. Work has a certain value (2 points)
+D. Work is important (3 points)
+ 
+⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-A. I don't think I can effectively help others (0 points)
+A. I cannot effectively help others (0 points)
 B. My ability to help is limited (1 point)
 C. I can provide some help (2 points)
-D. I can effectively help others (3 points)
-
+D. I effectively help others (3 points)
+ 
 ⸻
+ 
+Please choose one option that best matches your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
-
-A. I am very dissatisfied with my work performance (0 points)
-B. I am not very satisfied with the performance (1 point)
-C. I am basically satisfied (2 points)
-D. I am very satisfied with the performance (3 points)
-
+A. I am very dissatisfied with my work (0 points)
+B. I am not completely satisfied (1 point)
+C. Generally satisfied (2 points)
+D. I am completely satisfied (on) (3 points)
+ 
 ⸻
+ 
+Please choose one option that best suits your recent state of work or study:
 
-Please choose the one that best suits your situation based on your recent work or study status：
+A. I do not feel any development in work or study (0 points)
+B. My growth is limited (1 point)
+C. There is some progress (2 points)
+D. I am constantly developing and growing (3 points)
 
-A. I don't think I have grown up in my career or study (0 points)
-B. My growth is relatively limited (1 point)
-C. I have a certain growth (2 points)
-D. I continue to grow and progress (3 points)
+TEST NUMBER 3
 
+ 
+Self-assessment scale of anxiety
+ 
+This test is based on the structure of the Beck Anxiety Scale and is used to assess your anxiety level and related psychological and physical reactions over the past two weeks. Please choose the option that most accurately reflects your real feelings. The results are for reference and self-understanding only.
+ 
+———
+Please choose one option that best suits your condition over the past two weeks:
 
-
-
-
-3) НазВание: Anxiety State Self-assessment Scale
-
-Описание: This test is based on the structure of the Beck Anxiety Scale and is used to assess your anxiety level and related physical and mental responses in the last two weeks.Please choose the most suitable option according to your true feelings. The results are only for reference and self-understanding.
-
-Вопрос, ответ, балл: 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I have been in a state of high tension or anxiety almost all the time (0 points)
-B. I often feel nervous (1 point)
-C. I feel nervous occasionally (2 points)
-D. I have little or no tension (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+A. I am almost constantly in a state of high tension or anxiety (0 points)
+B. I often feel tension (1 point)
+C. Sometimes I feel tension (2 points)
+D. I rarely or don't feel tension at all (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I can't relax at all (0 points)
-B. It's hard for me to relax (1 point)
-C. I can relax sometimes (2 points)
+B. It's very difficult for me to relax (1 point)
+C. Sometimes I can relax (2 points)
 D. I can relax easily (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I feel a strong fear of the future or the unknown (0 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the last two weeks.:
+ 
+A. I have a strong fear of the future or the unknown (0 points)
 B. I often worry about the future (1 point)
-C. I have some concerns (2 points)
+C. I have some anxiety (2 points)
 D. I rarely worry (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-⸻
+A. I often feel palpitations or discomfort (0 points)
+B. Sometimes my heart rate increases (1 point)
+C. Sometimes it happens (2 points)
+D. It almost never happens (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
+A. I often feel difficulty or unpleasant breathing (0 points)
+B. Sometimes I have discomfort when breathing (1 point)
+C. Sometimes it happens (2 points)
+D. I don't have it (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-A. I often feel a fast heartbeat or discomfort (0 points)
-B. Sometimes my heart beats faster (1 point)
-C. Occasional appearance (2 points)
-D. Almost no such situation (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I often feel difficulty breathing or not smooth (0 points)
-B. Sometimes I feel uncomfortable breathing (1 point)
-C. Occasional appearance (2 points)
-D. There is no such situation (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I often experience abnormal sweating (0 points)
+A. I often have unusual sweating (0 points)
 B. Sometimes I sweat (1 point)
-C. Occasional appearance (2 points)
-D. Normal (3 points)
+C. Sometimes it happens (2 points)
+D. Everything is fine (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-⸻
+A. My hands or body often shake (0 points)
+B. Sometimes I tremble (1 point)
+C. Sometimes it happens (2 points)
+D. I don't have it (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
+A. I often feel like I might lose control of myself (0 points)
+B. Sometimes I'm afraid of losing control (1 point)
+C. Sometimes I have this feeling (2 points)
+D. I'm in good control (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-A. I often shake my hands or my body trembles (0 points)
-B. Trembling sometimes (1 point)
-C. Occasional appearance (2 points)
-D. There is no such situation (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I often feel that I will lose control (0 points)
-B. I sometimes worry about getting out of control (1 point)
-C. Occasionally feel this way (2 points)
-D. I can control myself well (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I often expect the worst result (0 points)
-B. I often think about the disadvantages (1 point)
+A. I often imagine the worst outcome of events (0 points)
+B. I often think about the bad (1 point)
 C. Sometimes it happens like this (2 points)
-D. I can usually think rationally (3 points)
+D. I usually know how to think rationally (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I can hardly calm down (0 points)
-B. I often fidget (1 point)
-C. Occasionally uneasy (2 points)
+A. I almost can't calm down (0 points)
+B. I often feel inner anxiety (1 point)
+C. Sometimes I feel anxious (2 points)
 D. I can stay calm (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I am very easily frightened (0 points)
-B. More frightened than before (1 point)
-C. A little change (2 points)
-D. Normal (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+A. I'm very easy to scare (0 points)
+B. I've become(a) It's easier to get scared than before (1 point)
+C. There are minor changes (2 points)
+D. Everything is as usual (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I can hardly concentrate (0 points)
-B. Difficult to concentrate (1 point)
-C. Occasional difficulties (2 points)
-D. Normal concentration (3 points)
+B. It is very difficult for me to concentrate (1 point)
+C. Sometimes it is difficult (2 points)
+D. Attention is normal (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I have been on high alert (0 points)
-B. Often tight (1 point)
-C. Occasionally nervous (2 points)
+A. I am constantly in a state of heightened alertness (0 points)
+B. I am often tense (a) (1 point)
+C. Sometimes I feel tense (2 points)
 D. I can relax (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-⸻
+A. I am very worried about physical discomfort or unpleasant sensations in my body (0 points)
+B. I often worry (1 point)
+C. Sometimes I worry (2 points)
+D. I do not worry (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I am very worried about being unwell (0 points)
-B. Worry often (1 point)
-C. Worry occasionally (2 points)
-D. Don't worry (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. Anxiety obviously affects my sleep (0 points)
-B. Often have difficulty falling asleep (1 point)
-C. Occasional impact (2 points)
-D. Normal sleep (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
+A. Anxiety noticeably affects my sleep (0 points)
+B. I often find it difficult to fall asleep (1 point)
+C. Sometimes it affects (2 points)
+D. Sleep is normal (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
 
 A. I often feel muscle tension or pain (0 points)
-B. Often tight (1 point)
-C. Occasionally (2 points)
-D. Relax normally (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I will deliberately avoid many situations or scenes (0 points)
-B. Often avoid (1 point)
-C. Occasionally avoid (2 points)
-D. Will not avoid (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I can't stop thinking about the problem repeatedly (0 points)
-B. Think about it often (1 point)
-C. Occasionally (2 points)
-D. I can control thinking (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. My work or study efficiency is seriously reduced (0 points)
-B. Significant decline (1 point)
-C. Slightly decreased (2 points)
-D. Basically normal (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. I am very anxious in socializing (0 points)
-B. Frequent anxiety (1 point)
-C. A little bit (2 points)
-D. Not anxious (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your status in the last two weeks：
-
-A. My anxiety seriously affects my daily life (0 points)
-B. Greater impact (1 point)
-C. Has a certain impact (2 points)
-D. Basically no effect (3 points)
-
-
-4) НазВание: Self-esteem Level Assessment Scale
-
-Описание: This test is based on the structure of the Rosenberg Self-esteem Scale (RSES) and is used to assess an individual's overall sense of self-worth and self-esteem.Please choose the most suitable option according to your true feelings. The results are only for reference and self-understanding.
-
-Вопрос, ответ, баллы: 
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I don't think I have anything to be proud of (0 points)
-B. I think I have very few advantages (1 point)
-C. I think I have some advantages (2 points)
-D. I think I have a lot to be sure of (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I don't think I have any value (0 points)
-B. I have a low sense of value to myself (1 point)
-C. I think I have a certain value (2 points)
-D. I think I am a valuable person (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. Overall, I tend to deny myself (0 points)
-B. I am sometimes dissatisfied with myself (1 point)
-C. I can basically accept myself (2 points)
-D. I am generally satisfied with myself (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I often feel that I am not as good as others (0 points)
-B. I sometimes think so (1 point)
-C. I rarely think so (2 points)
-D. I don't see myself that way (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I don't think I have anything to be proud of (0 points)
-B. I am rarely proud of myself (1 point)
-C. I am sometimes proud of myself (2 points)
-D. I am often proud of myself (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I feel like a failed person (0 points)
-B. I sometimes feel like I have failed (1 point)
-C. I basically don't think so (2 points)
-D. I think I am a successful or capable person (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I have a negative attitude towards myself (0 points)
-B. I sometimes have a low evaluation of myself (1 point)
-C. I basically have a neutral or positive attitude (2 points)
-D. I have a positive attitude towards myself (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I hope I can respect myself more (0 points)
-B. I sometimes don't respect myself enough (1 point)
-C. I can respect myself most of the time (2 points)
-D. I always respect myself (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I don't think I have the ability (0 points)
-B. I feel that my ability is weak (1 point)
-C. I think I have a certain ability (2 points)
-D. I believe I am capable (3 points)
-
-⸻
-
-Please choose the one that best suits your situation based on your true feelings in the recent period of time：
-
-A. I am often dissatisfied with myself (0 points)
-B. I am sometimes dissatisfied with myself (1 point)
-C. I am basically satisfied (2 points)
-D. I am very satisfied with myself (3 points)
-
-
-
-
-
-
-5) НазВание: Stress Perception Assessment Scale
-
-Описание: This test is based on the structure of the Stress Perception Scale (PSS-10) and is used to assess your subjective experience of life stress, control, and burden in the last month.Please choose the most suitable option according to your true feelings. The results are only for reference and self-understanding.
-
-Вопрос,ответ, балл:
-
-You are upset because of something unexpected.
-
-A. Often so (0 points)
-B. More often like this (1 point)
-C. Occasionally like this (2 points)
-D. Little or no such (3 points)
-
-⸻
-
-You feel that you cannot control the important things in your life.
-
-A. Often so (0 points)
-B. More often like this (1 point)
-C. Occasionally like this (2 points)
-D. Little or no such (3 points)
-
-⸻
-
-You feel nervous and stressed.
-
-A. Often so (0 points)
-B. More often like this (1 point)
-C. Occasionally like this (2 points)
-D. Little or no such (3 points)
-
-⸻
-B. 30-60 minutes (1 minute)
-C. 15-30 minutes (2 minutes)
-D. Less than 15 minutes (3 minutes)
-
-⸻
-
-You have difficulty falling asleep within a month
-
-A. Almost every day (0 points)
-B. Multiple times a week (1 point)
-C. Occasionally (2 points)
-D. Almost nothing (3 points)
-
-⸻
-
-Your average actual sleep time per night
-
-A. Less than 5 hours (0 minutes)
-B. 5-6 hours (1 minute)
-C. 6-7 hours (2 minutes)
-D. More than 7 hours (3 minutes)
-
-⸻
-
-What do you think of your overall sleep quality
-
-A. Very poor (0 points)
-B. Poor (1 point)
-C. General (2 points)
-D. Very good (3 points)
-
-⸻
-
-You wake up at night or have difficulty sleeping continuously
-
-A. Almost every day (0 points)
-B. Often (1 point)
-C. Occasionally (2 points)
-D. Almost nothing (3 points)
-
-⸻
-
-When you wake up because you need to go to the toilet
-
-A. Almost every day (0 points)
-B. Often (1 point)
-C. Occasionally (2 points)
-D. Little or no (3 points)
-
-⸻
-
-You affect your sleep due to breathing discomfort or snoring
-
-A. Very serious (0 points)
-B. Has a certain impact (1 point)
-C. Slight impact (2 points)
-D. No effect (3 points)
-
-⸻
-
-You affect your sleep due to cough or physical discomfort
-
-A. Often seriously affected (0 points)
-B. Has a certain impact (1 point)
-C. Occasional impact (2 points)
-D. No effect (3 points)
-
-⸻
-
-You affect your sleep because you feel cold or hot
-
-A. Frequent impact (0 points)
-B. Has a certain impact (1 point)
-C. Occasional impact (2 points)
+B. I often feel stiffness (1 point)
+C. Sometimes (2 points)
+D. Relaxation is normal (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. I specifically avoid many situations or places (0 points)
+B. I often avoid (1 point)
+C. Sometimes I avoid (2 points)
+D. I do not avoid (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. I can't stop constantly replaying the same thoughts (0 points)
+B. I often think about everything over and over again (1 point)
+C. Sometimes (2 points)
+D. I can control my thoughts (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. My efficiency at work or study has decreased significantly (0 points)
+B. Decreased noticeably (1 point)
+C. Decreased slightly (2 points)
+D. Overall, everything is fine (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. I experience severe anxiety in communicating with people (0 points)
+B. I often worry (1 point)
+C. I worry a little (2 points)
+D. I do not worry (3 points)
+ 
+————
+ 
+Please choose one option that best suits your condition over the past two weeks:
+
+A. My anxiety has a serious impact on daily life (0 points)
+B. The influence is quite strong (1 point)
+C. There is a certain influence (2 points)
 D. Almost no effect (3 points)
 
-⸻
 
-Do you have nightmares or dreams that affect your sleep?
+TEST NUMBER 4
+
+ 
+Self-esteem assessment scale
+ 
+This test is based on the structure of the Rosenberg Self-Assessment Scale (RSES) and is used to assess a general sense of self-worth and self-esteem. Please choose the option that most accurately reflects your real feelings. The results are for reference and self-understanding only.
+ 
+———
+ 
+Please choose one option that best matches your recent feelings:
+
+A. I think I have nothing to be proud of (0 points)
+B. I think I have few virtues (1 point)
+C. I think I have some virtues (2 points)
+D. I think I have a lot of qualities to be proud of (3 points)
+ 
+————
+ 
+Please choose one option that best matches your recent feelings:
+
+A. I believe that I have no value (0 points)
+B. My sense of self-worth is low (1 point)
+C. I believe that I have a certain value (2 points)
+D. I consider myself a valuable person (3 points)
+ 
+————
+ 
+Please choose one option that best suits your feelings lately.:
+ 
+A. In general, I tend to have a negative attitude towards myself (0 points)
+B. Sometimes I am dissatisfied with myself (1 point)
+C. In general, I accept myself (2 points)
+D. In general, I am satisfied with myself (3 points)
+ 
+————
+ 
+Please choose one option that best matches your recent feelings:
+
+A. I often consider myself worse than others (0 points)
+B. Sometimes I think so (1 point)
+C. I rarely think so (2 points)
+D. I do not consider myself worse than others (3 points)
+ 
+————
+ 
+Please choose one option that best suits your feelings lately.:
+ 
+A. I think I have nothing to be proud of (0 points)
+B. I am rarely proud of myself (1 point)
+C. Sometimes I am proud of myself (2 points)
+D. I am often proud of myself (3 points)
+ 
+————
+ 
+Please choose one option that best matches your recent feelings:
+
+A. I consider myself a loser (0 points)
+B. Sometimes I feel like a loser (1 point)
+C. In general, I don't think so (2 points)
+D. I consider myself a successful or capable person (3 points)
+ 
+————
+ 
+Please choose one option that best suits your feelings lately.:
+ 
+A. I treat myself negatively (0 points)
+B. Sometimes I rate myself negatively (1 point)
+C. In general, my attitude is neutral or positive (2 points)
+D. I treat myself positively (3 points)
+ 
+————
+ 
+Please choose one option that best suits your feelings lately:
+
+A. I would like to respect myself more (0 points)
+B. Sometimes I don't respect myself enough (1 point)
+C. In most cases I respect myself (2 points)
+D. I always respect myself (3 points)
+ 
+————
+ 
+Please choose one option that best matches your recent feelings:
+
+A. I believe that I have no abilities (0 points)
+B. I consider my abilities weak (1 point)
+C. I believe that I have certain abilities (2 points)
+D. I am confident (a) in their abilities (3 points)
+ 
+————
+ 
+Please choose one option that best matches your feelings lately:
+
+A. I am often dissatisfied with myself (0 points)
+B. Sometimes I am dissatisfied with myself (1 point)
+C. In general, I am satisfied with myself (2 points)
+D. I am very satisfied by yourself (3 points)
+
+
+
+TEST NUMBER 5
+
+The scale of assessment of perceived stress
+ 
+Description: This test is based on the structure of the Perceived Stress Scale (PSS-10) and is used to assess your subjective perception of life stress, feelings of control and stress over the past month. Please choose the option that most accurately reflects your real feelings. The results are intended for reference and self-understanding only.
+———————
+ 
+You feel irritated or anxious due to unexpected events.
 
 A. Often (0 points)
-B. Sometimes (1 point)
-C. Occasionally (2 points)
-D. Almost nothing (3 points)
+B. Quite often (1 point)
+C. Sometimes (2 points)
+D. Rarely or never (3 points)
+ 
+————
+ 
+You feel like you can't control the important things in your life.
 
+A. Often (0 points)
+B. Quite often (1 point)
+C. Sometimes (2 points)
+D. Rarely or never (3 points)
+ 
+————
+ 
+You feel tense and stressed.
+
+A. Often (0 points)
+B. Quite often (1 point)
+C. Sometimes (2 points)
+D. Rarely or never (3 points)
+ 
+————
+ 
+Do you think that you are able to cope with personal problems in life.
+
+A. I have almost no such ability (0 points)
+B. I have some ability, but it is unstable (1 point)
+C. In most cases I cope (2 points)
+D. I usually do well (3 points)
+ 
+————
+ 
+You feel that everything is going according to your plan.
+ 
+A. Almost never (0 points)
+B. Rarely (1 point)
+C. Sometimes (2 points)
+D. In most cases (3 points)
+ 
+————
+ 
+You feel like you are not doing all the things that need to be done.
+
+A. Often (0 points)
+B. Quite often (1 point)
+C. Sometimes (2 points)
+D. Rarely or never (3 points)
+ 
+————
+ 
+You can control annoying situations in your life.
+
+A. I can't control them much (0 points)
+B. I don't control them very well (1 point)
+C. In most cases I can control them (2 points)
+D. I usually control them well (3 points)
+ 
+————
+ 
+You feel like you're in control of the situation in your life.
+
+A. I almost never feel this way (0 points)
+B. I rarely feel this way (1 point)
+C. Sometimes I feel this way (2 points)
+D. Most of the time I feel this way (3 points)
+ 
+————
+ 
+You feel overwhelmed because there are too many things to do.
+ 
+A. Often (0 points)
+B. Quite often (1 point)
+C. Sometimes (2 points)
+D. Rarely or never (3 points)
+ 
+————
+ 
+You get angry because of situations that you can't control.
+ 
+A. Often (0 points)
+B. Quite often (1 point)
+C. Sometimes (2 points)
+D. Rarely or never (3 points)
+
+
+
+TEST NUMBER 6
+
+Workload assessment scale
+ 
+This test is based on the structure of the NASA Load Index (NASA-TLX) and is used to assess the subjective level of stress when performing tasks or work, including cognitive load, physical stress, time pressure and emotional state. Please choose the option that most accurately reflects your real feelings. The results are intended for reference and self-understanding only.
+ 
+——-
+ 
+Mental stress
+
+A. The task is very difficult, requires high concentration and intense thinking, it is difficult to cope (0 points)
+B. The task is quite complex and requires considerable thought (1 point). The task has a certain complexity, but it can be handled (2 points). The task is simple and does not require much effort (3 points)
+
+
+ 
+————
+ 
+Physical activity
+
+A. The task requires significant physical effort, severe fatigue is felt (0 points)
+B. The physical activity is quite high (1 point)
+C. There is a certain physical activity (2 points)
+D. It practically does not require physical effort (3 points)
+ 
+————
+ 
+Time pressure
+
+A. There is very little time, almost no reserve (0 points)
+B. Time is quite limited (1 point)
+C. There is enough time in general (2 points)
+D. There is enough time, you can safely complete the task (3 points)
+ 
+————
+ 
+The result of the task
+
+A. I think I did very poorly (0 points)
+B. The result is not very good (1 point)
+C. The result is generally acceptable (2 points)
+D. I am satisfied with my result (3 points)
+ 
+————
+ 
+Level of effort
+
+A. I have put in(a) a lot of effort, but it was still hard (0 points)
+B. It took a lot of effort (1 point)
+C. It took some effort (2 points)
+D. The task was easy (3 points)
+ 
+————
+ 
+Feeling of frustration
+ 
+A. I feel very disappointed, irritated, or stressed (0 points)
+B. I have a pronounced feeling of frustration (1 point)
+C. Sometimes I feel uncomfortable (2 points)
+D. I feel calm, without frustration (3 points)
+ 
 ⸻
-
-You affect sleep due to pain
-
-A. Often seriously affected (0 points)
-B. Has a certain impact (1 point)
-C. Occasionally (2 points)
-D. No effect (3 points)
-
-⸻
-
-Do you use sleep aid drugs
-
-A. Frequent use (0 points)
-B. Occasional use (1 point)
-C. Rarely used (2 points)
-D. Never use (3 points)
-
-⸻
-
-You feel sleepy or lack of energy during the day
-
-A. Almost every day (0 points)
-B. Often (1 point)
-C. Occasionally (2 points)
-D. Very little (3 points)
-
-⸻
-
-Your ability to stay awake during the day
-
-A. It's hard to stay awake (0 points)
-B. Have certain difficulties (1 point)
-C. Basically (2 points)
-D. No problem at all (3 points)
-
-⸻
-
-Your interest or motivation in daytime activities
-
-A. Not at all (0 points)
-B. Lower (1 point)
-C. General (2 points)
-D. Very good (3 points)
-
-⸻
-
-Do you feel that your sleep time is irregular
-
-A. Very irregular (0 points)
-B. Less regular (1 point)
-C. A little fluctuation (2 points)
-D. Very regular (3 points)
-
-⸻
-
-Is your sleep time stable?
-
-A. Completely unstable (0 points)
-B. More unstable (1 point)
-C. Basically stable (2 points)
-D. Very stable (3 points)
-
-⸻
-
-Is the time you wake up fixed?
-
-A. Very not fixed (0 points)
-B. Not very fixed (1 point)
-C. Relatively fixed (2 points)
-D. Very fixed (3 points)
-
-⸻
-
-Your overall satisfaction with your sleep state
-
-A. Very dissatisfied (0 points)
-B. Not very satisfied (1 point)
-C. Basic satisfaction (2 points)
-D. Very satisfied (3 points)

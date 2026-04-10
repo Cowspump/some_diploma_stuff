@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import os
 import re
 from datetime import date
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,15 @@ def _needs_test_reseed(db: Session) -> bool:
     if os.getenv("FORCE_RESEED_TESTS") == "1":
         return True
 
+    current_hash = _compute_tests_txt_hash()
+    try:
+        state = db.query(models.SeedState).filter(models.SeedState.key == "tests_txt_hash").first()
+        if not state or (state.value or "") != current_hash:
+            return True
+    except Exception:
+        # If table doesn't exist yet or query fails, fall back to heuristics below
+        pass
+
     # No tests => if users already exist, we still need to seed tests
     any_test = db.query(models.Test).first()
     if not any_test:
@@ -128,6 +138,64 @@ def _needs_materials_reseed(db: Session) -> bool:
 
     mats = db.query(models.Material).limit(25).all()
     return any(has_cjk(m.title) or has_cjk(m.content) for m in mats)
+
+
+def _needs_results_seed(db: Session) -> bool:
+    if os.getenv("FORCE_RESEED_RESULTS") == "1":
+        return True
+
+    any_result = db.query(models.TestResult).first()
+    if not any_result:
+        return True
+
+    any_test = db.query(models.Test).first()
+    if not any_test:
+        return False
+
+    orphan = (
+        db.query(models.TestResult)
+        .outerjoin(models.Test, models.Test.id == models.TestResult.test_id)
+        .filter(models.Test.id.is_(None))
+        .first()
+    )
+    return bool(orphan)
+
+
+def _seed_test_results(db: Session) -> None:
+    """
+    Create demo test results for existing users/tests.
+    """
+    tests = db.query(models.Test).all()
+    workers = db.query(models.User).filter(models.User.role == models.UserRole.worker).all()
+    if not tests or not workers:
+        return
+
+    # Wider range of dates: Dec -> Apr (inclusive)
+    start_dt = datetime(2025, 12, 1, 9, 0, 0)
+    end_dt = datetime(2026, 4, 9, 21, 0, 0)
+
+    for i, worker in enumerate(workers):
+        profile = WORKER_PROFILES[i % len(WORKER_PROFILES)]
+        for test in tests:
+            attempts = random.randint(4, 10)
+            for _ in range(attempts):
+                total_score = 0
+                for question in (test.questions or []):
+                    opts = question.options or []
+                    if not isinstance(opts, list) or not opts:
+                        continue
+                    idx = random.randint(profile["min"], min(profile["max"], len(opts) - 1))
+                    total_score += int((opts[idx] or {}).get("points") or 0)
+
+                created_at = _rand_dt_between(start_dt, end_dt)
+                db.add(
+                    models.TestResult(
+                        total_score=total_score,
+                        user_id=worker.id,
+                        test_id=test.id,
+                        created_at=created_at,
+                    )
+                )
 
 
 def _reseed_tests_from_txt(db: Session, therapist_id: int):
@@ -197,6 +265,16 @@ def _reseed_tests_from_txt(db: Session, therapist_id: int):
                     ))
 
     db.commit()
+    try:
+        current_hash = _compute_tests_txt_hash()
+        state = db.query(models.SeedState).filter(models.SeedState.key == "tests_txt_hash").first()
+        if state:
+            state.value = current_hash
+        else:
+            db.add(models.SeedState(key="tests_txt_hash", value=current_hash))
+        db.commit()
+    except Exception:
+        db.rollback()
     logger.info("Tests reseeded successfully (%s tests).", len(all_tests))
 
 
@@ -280,6 +358,13 @@ def _load_tests_from_txt() -> list[dict]:
         current_test: dict | None = None
         current_question_text: str | None = None
         current_options: list[dict] = []
+        awaiting_title = False
+        desc_lines: list[str] = []
+        description_done = False
+
+        header_re = re.compile(r"^\s*(?:тест\s*номер|test\s*number|测试编号)\s*\d+\s*$", flags=re.IGNORECASE)
+        # In the source txt, separators are often 3-4 chars ("——-" / "————") or longer.
+        sep_re = re.compile(r"^[\-\—\s_]{3,}$")
 
         def flush_question():
             nonlocal current_question_text, current_options, current_test
@@ -299,13 +384,27 @@ def _load_tests_from_txt() -> list[dict]:
             current_options = []
 
         def flush_test():
-            nonlocal current_test
+            nonlocal current_test, desc_lines, description_done, awaiting_title
+            if current_test is not None and desc_lines and not current_test.get("description"):
+                d = "\n".join([x for x in desc_lines if (x or "").strip()]).strip()
+                current_test["description"] = d or None
             if current_test and current_test.get("questions"):
                 tests.append(current_test)
             current_test = None
+            awaiting_title = False
+            desc_lines = []
+            description_done = False
 
         for raw in lines:
             line = (raw or "").strip()
+
+            # New test header like "ТЕСТ НОМЕР 1" / "TEST NUMBER 1" / "测试编号1"
+            if header_re.match(line):
+                flush_question()
+                flush_test()
+                awaiting_title = True
+                continue
+
             title = _extract_title(line)
             if title:
                 flush_question()
@@ -317,11 +416,24 @@ def _load_tests_from_txt() -> list[dict]:
                 }
                 continue
 
+            if awaiting_title:
+                if not line:
+                    continue
+                # The first non-empty line after header is the test title
+                current_test = {"title": line, "description": None, "questions": []}
+                awaiting_title = False
+                desc_lines = []
+                description_done = False
+                continue
+
             if not current_test:
                 continue
 
-            if line == "⸻":
+            # Common question separators in source files: "⸻" and long dash/underscore lines
+            if line == "⸻" or sep_re.match(line):
                 flush_question()
+                # If we were still collecting description, stop here
+                description_done = True
                 continue
 
             opt = _parse_option_line(line)
@@ -338,13 +450,14 @@ def _load_tests_from_txt() -> list[dict]:
             if not line:
                 continue
 
-            if (
-                not current_test.get("questions")
-                and current_question_text is None
-                and not current_options
-                and current_test.get("description") is None
-            ):
-                current_test["description"] = line
+            # Collect multi-line description right after title until a separator line
+            if not description_done and not current_test.get("questions") and current_question_text is None and not current_options:
+                if sep_re.match(line):
+                    description_done = True
+                    continue
+                desc_lines.append(line)
+                # Do not "continue" forever: once we have description and we hit something
+                # that looks like the beginning of a question later, it will be handled below.
                 continue
 
             if current_question_text:
@@ -1780,6 +1893,22 @@ def _load_ivan_journals() -> list[dict]:
     return out
 
 
+def _compute_tests_txt_hash() -> str:
+    """
+    Stable fingerprint of backend/tests/*.txt to decide if reseed is needed.
+    """
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    parts = []
+    for fname in ("tests/rus_tests.txt", "tests/en_tests.txt", "tests/zh_tests.txt"):
+        path = os.path.join(base_dir, fname)
+        try:
+            with open(path, "rb") as f:
+                parts.append(f.read())
+        except FileNotFoundError:
+            parts.append(b"")
+    return hashlib.sha256(b"\n---\n".join(parts)).hexdigest()
+
+
 def _make_note_i18n(base_map: dict[str, str] | None) -> dict[str, str] | None:
     # Keep some empty notes
     if base_map is None:
@@ -1809,6 +1938,18 @@ def seed_database(db: Session):
 
         if _needs_materials_reseed(db):
             _reseed_materials_from_txt(db, author_id=therapist_id)
+
+        if _needs_results_seed(db):
+            # Recreate demo history if results are missing or orphaned after reseed.
+            if os.getenv("FORCE_RESEED_RESULTS") == "1":
+                db.query(models.TestResult).delete(synchronize_session=False)
+            else:
+                db.query(models.TestResult).filter(
+                    ~models.TestResult.test_id.in_(db.query(models.Test.id))
+                ).delete(synchronize_session=False)
+            db.flush()
+            _seed_test_results(db)
+            db.commit()
 
         return
 
@@ -2008,6 +2149,18 @@ def seed_database(db: Session):
                     db.add(models.JournalTranslation(journal_id=entry.id, lang="en", translated_note_text=en_text))
                 if zh_text:
                     db.add(models.JournalTranslation(journal_id=entry.id, lang="zh", translated_note_text=zh_text))
+
+    # Store current tests fingerprint to prevent unnecessary reseeds on next startup
+    try:
+        current_hash = _compute_tests_txt_hash()
+        state = db.query(models.SeedState).filter(models.SeedState.key == "tests_txt_hash").first()
+        if state:
+            state.value = current_hash
+        else:
+            db.add(models.SeedState(key="tests_txt_hash", value=current_hash))
+    except Exception:
+        # Non-fatal; seeding should still succeed even if this fails
+        pass
 
     db.commit()
     logger.info("Seed data created successfully!")

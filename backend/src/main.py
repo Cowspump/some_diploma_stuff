@@ -78,6 +78,10 @@ with database.engine.connect() as conn:
     if "journal_translations" not in inspector.get_table_names():
         models.JournalTranslation.__table__.create(bind=conn)
 
+    # Создаём таблицу seed_state если её нет
+    if "seed_state" not in inspector.get_table_names():
+        models.SeedState.__table__.create(bind=conn)
+
 # Auto-seed test data if DB is empty
 with database.SessionLocal() as db:
     seed_database(db)
