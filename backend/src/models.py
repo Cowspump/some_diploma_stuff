@@ -136,6 +136,7 @@ class Material(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
+    emoji = Column(String, nullable=True)
     # ru/en/zh — derived automatically from title+content
     source_lang = Column(String, nullable=False, default="ru")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

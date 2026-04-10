@@ -168,17 +168,20 @@ class UserWithResults(BaseModel):
 class MaterialCreate(BaseModel):
     title: str
     content: str
+    emoji: Optional[str] = None
 
 
 class MaterialUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+    emoji: Optional[str] = None
 
 
 class MaterialOut(BaseModel):
     id: int
     title: str
     content: str
+    emoji: Optional[str] = None
     created_at: datetime
 
     class Config:

@@ -36,7 +36,7 @@ const MaterialsSection = () => {
       id: m.id,
       title: m.title,
       description: (m.content || "").slice(0, 90) + ((m.content || "").length > 90 ? "..." : ""),
-      icon: ICONS[i % ICONS.length],
+      icon: (m.emoji && String(m.emoji).trim()) ? String(m.emoji).trim() : ICONS[i % ICONS.length],
       content: m.content,
     }));
   }, [materials]);

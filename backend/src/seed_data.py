@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import os
 import re
+from datetime import date
 
 logger = logging.getLogger(__name__)
 
@@ -30,13 +31,17 @@ def _extract_title(line: str) -> str | None:
         return None
     lowered = s.casefold()
 
-    # Variants observed in backend/test.txt:
+    # Variants observed in files:
     # - "Название 职业倦怠评估量表"
-    # - "Название:  抑郁状态评估量表"
+    # - "Название: 抑郁状态评估量表"
     # - "НАЗВАНИЕ :焦虑状态评估量表"
+    # - "1) Название: Шкала ..."
+    # - "1) НазВание: ..."
+    # - "1)Название: ..."
     if "название" in lowered or lowered.startswith("title"):
-        # strip leading "Название" / "НАЗВАНИЕ" / "Title"
-        s2 = re.sub(r"^(название|title)\s*[:：]?\s*", "", s, flags=re.IGNORECASE)
+        # strip optional leading numbering like "1)" / "1." and leading "Название"/"Title"
+        s_norm = re.sub(r"^\s*\d+\s*[\)\.]\s*", "", s)
+        s2 = re.sub(r"^(название|title)\s*[:：]?\s*", "", s_norm, flags=re.IGNORECASE)
         s2 = s2.strip()
         return s2 or None
 
@@ -47,6 +52,11 @@ def _parse_option_line(line: str) -> dict | None:
     s = (line or "").strip()
     if not s:
         return None
+
+    # Generic: A. text (0 баллов) / (1 минута) / (0 points) / （0分） / (на 1 пункт)
+    m = re.match(r"^[A-D]\.\s*(.+?)\s*[（(]\s*(?:на\s*)?(\d+)\s*[^)）]*[)）]\s*$", s, flags=re.IGNORECASE)
+    if m:
+        return {"text": m.group(1).strip(), "points": int(m.group(2))}
 
     # A. text（0分） / A. text (0分)
     m = re.match(r"^[A-D]\.\s*(.+?)\s*[（(]\s*(\d+)\s*分\s*[)）]\s*$", s)
@@ -79,10 +89,10 @@ def _needs_test_reseed(db: Session) -> bool:
     if os.getenv("FORCE_RESEED_TESTS") == "1":
         return True
 
-    # No tests => seed path will create them anyway
+    # No tests => if users already exist, we still need to seed tests
     any_test = db.query(models.Test).first()
     if not any_test:
-        return False
+        return True
 
     # If any canonical test title contains CJK, likely RU parsing didn't apply
     def has_cjk(text: str | None) -> bool:
@@ -99,12 +109,33 @@ def _needs_test_reseed(db: Session) -> bool:
     return any(has_cjk(q.text) for q in questions)
 
 
+def _needs_materials_reseed(db: Session) -> bool:
+    """
+    Reseed materials when we detect that canonical RU content didn't get loaded
+    (e.g. materials ended up in ZH due to parsing issues) or when forced via env.
+    """
+    if os.getenv("FORCE_RESEED_MATERIALS") == "1":
+        return True
+
+    any_material = db.query(models.Material).first()
+    if not any_material:
+        return True
+
+    def has_cjk(text: str | None) -> bool:
+        if not text:
+            return False
+        return any("\u4e00" <= ch <= "\u9fff" for ch in text)
+
+    mats = db.query(models.Material).limit(25).all()
+    return any(has_cjk(m.title) or has_cjk(m.content) for m in mats)
+
+
 def _reseed_tests_from_txt(db: Session, therapist_id: int):
     """
     Drop existing tests/questions/translations/results and re-create them from txt files.
     Users/journals are preserved.
     """
-    logger.info("Reseeding tests from backend/test*.txt ...")
+    logger.info("Reseeding tests from backend/tests/*.txt ...")
 
     # Delete dependent rows first (FK order)
     db.query(models.QuestionTranslation).delete(synchronize_session=False)
@@ -117,10 +148,13 @@ def _reseed_tests_from_txt(db: Session, therapist_id: int):
     all_tests = []
     for test_data in (_load_tests_from_txt() or []):
         # Canonical language in DB: RU. Translations for ZH/EN go into *_translations tables.
+        has_ru = bool((test_data.get("title_ru") or "").strip() or (test_data.get("description_ru") or "").strip())
+        canonical_lang = "ru" if has_ru else ("en" if (test_data.get("title_en") or "").strip() else "zh")
         test = models.Test(
             title=test_data.get("title_ru") or test_data.get("title_zh") or test_data.get("title_en"),
             description=test_data.get("description_ru") or test_data.get("description_zh") or test_data.get("description_en"),
             therapist_id=therapist_id,
+            source_lang=canonical_lang,
         )
         db.add(test)
         db.flush()
@@ -142,7 +176,9 @@ def _reseed_tests_from_txt(db: Session, therapist_id: int):
         for q_data in test_data["questions"]:
             base_text = q_data.get("text_ru") or q_data.get("text_zh") or q_data.get("text_en")
             base_options = q_data.get("options_ru") or q_data.get("options_zh") or q_data.get("options_en")
-            question = models.Question(text=base_text, options=base_options, test_id=test.id)
+            q_has_ru = bool((q_data.get("text_ru") or "").strip())
+            q_canonical_lang = "ru" if q_has_ru else ("en" if (q_data.get("text_en") or "").strip() else "zh")
+            question = models.Question(text=base_text, options=base_options, test_id=test.id, source_lang=q_canonical_lang)
             db.add(question)
             db.flush()
 
@@ -164,9 +200,60 @@ def _reseed_tests_from_txt(db: Session, therapist_id: int):
     logger.info("Tests reseeded successfully (%s tests).", len(all_tests))
 
 
+def _reseed_materials_from_txt(db: Session, author_id: int):
+    """
+    Drop existing materials/translations and re-create them from txt files.
+    Users/journals/tests are preserved.
+    """
+    logger.info("Reseeding materials from backend/materials/*.txt ...")
+
+    db.query(models.MaterialTranslation).delete(synchronize_session=False)
+    db.query(models.Material).delete(synchronize_session=False)
+    db.flush()
+
+    materials = _load_materials_from_txt() or []
+    for m in materials:
+        base_title = m.get("title_ru") or m.get("title_zh") or m.get("title_en")
+        base_content = m.get("content_ru") or m.get("content_zh") or m.get("content_en")
+        emoji = (m.get("emoji") or "").strip() or None
+        if not base_title or not base_content:
+            continue
+
+        has_ru = bool((m.get("title_ru") or "").strip() or (m.get("content_ru") or "").strip())
+        canonical_lang = "ru" if has_ru else ("en" if (m.get("title_en") or "").strip() else "zh")
+        mat = models.Material(
+            title=base_title,
+            content=base_content,
+            emoji=emoji,
+            author_id=author_id,
+            source_lang=canonical_lang,
+        )
+        db.add(mat)
+        db.flush()
+
+        for lang, title_key, content_key in (
+            ("zh", "title_zh", "content_zh"),
+            ("en", "title_en", "content_en"),
+        ):
+            t_title = m.get(title_key)
+            t_content = m.get(content_key)
+            if t_title and t_content:
+                db.add(
+                    models.MaterialTranslation(
+                        material_id=mat.id,
+                        lang=lang,
+                        translated_title=t_title,
+                        translated_content=t_content,
+                    )
+                )
+
+    db.commit()
+    logger.info("Materials reseeded successfully (%s materials).", len(materials))
+
+
 def _load_tests_from_txt() -> list[dict]:
     """
-    Load tests from backend/test.txt (+ optional test_ru.txt/test_en.txt).
+    Load tests from backend/tests/{zh_tests,rus_tests,en_tests}.txt.
 
     Strategy:
     - Parse each language file with the same parser.
@@ -180,13 +267,13 @@ def _load_tests_from_txt() -> list[dict]:
         with open(p, "r", encoding="utf-8") as f:
             return [ln.rstrip("\n") for ln in f]
 
-    zh_lines = read_lines("test.txt")
+    zh_lines = read_lines(os.path.join("tests", "zh_tests.txt"))
     if not zh_lines:
-        logger.warning("Seed tests file not found: backend/test.txt")
+        logger.warning("Seed tests file not found: backend/tests/zh_tests.txt")
         return []
 
-    ru_lines = read_lines("test_ru.txt")
-    en_lines = read_lines("test_en.txt")
+    ru_lines = read_lines(os.path.join("tests", "rus_tests.txt"))
+    en_lines = read_lines(os.path.join("tests", "en_tests.txt"))
 
     def parse(lines: list[str]) -> list[dict]:
         tests: list[dict] = []
@@ -323,6 +410,112 @@ def _load_tests_from_txt() -> list[dict]:
             )
 
         merged.append(out)
+
+    return merged
+
+
+def _load_materials_from_txt() -> list[dict]:
+    """
+    Load materials from backend/materials/{zh_mat,rus_mat,eng_mat}.txt
+
+    Strategy:
+    - Parse each language file with the same parser.
+    - Merge by material index (files must have the same structure/order).
+    """
+
+    def read_lines(rel_path: str) -> list[str] | None:
+        p = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", rel_path))
+        if not os.path.exists(p):
+            return None
+        with open(p, "r", encoding="utf-8") as f:
+            return [ln.rstrip("\n") for ln in f]
+
+    zh_lines = read_lines(os.path.join("materials", "zh_mat.txt"))
+    ru_lines = read_lines(os.path.join("materials", "rus_mat.txt"))
+    en_lines = read_lines(os.path.join("materials", "eng_mat.txt"))
+
+    if not (zh_lines and ru_lines and en_lines):
+        logger.warning("Seed materials files not found under backend/materials/")
+        return []
+
+    def parse(lines: list[str]) -> list[dict]:
+        items: list[dict] = []
+        current_title: str | None = None
+        current_lines: list[str] = []
+        current_emoji: str | None = None
+        in_text = False
+
+        title_re = re.compile(r"^\s*\d+\.\s*НАЗВАНИЕ\s*[:：]\s*(.+?)\s*$", flags=re.IGNORECASE)
+
+        def flush():
+            nonlocal current_title, current_lines, in_text, current_emoji
+            if current_title and current_lines:
+                content = "\n".join(current_lines).strip()
+                if content:
+                    items.append({"title": current_title.strip(), "content": content, "emoji": current_emoji})
+            current_title = None
+            current_lines = []
+            current_emoji = None
+            in_text = False
+
+        for raw in lines:
+            line = (raw or "").rstrip("\n")
+            s = line.strip()
+
+            m = title_re.match(line)
+            if m:
+                flush()
+                current_title = m.group(1).strip()
+                continue
+
+            if current_title is None:
+                continue
+
+            lowered = s.casefold()
+            if lowered.startswith("текст"):
+                in_text = True
+                continue
+
+            if lowered.startswith("смайлик"):
+                # e.g. "СМАЙЛИК: 🥱"
+                m_emoji = re.search(r"[:：]\s*(.+)\s*$", line)
+                if m_emoji:
+                    current_emoji = m_emoji.group(1).strip() or None
+                continue
+
+            if not in_text:
+                continue
+
+            current_lines.append(line)
+
+        flush()
+        return items
+
+    zh_items = parse(zh_lines)
+    ru_items = parse(ru_lines)
+    en_items = parse(en_lines)
+
+    merged: list[dict] = []
+    max_len = max(len(zh_items), len(ru_items), len(en_items))
+    for i in range(max_len):
+        z = zh_items[i] if i < len(zh_items) else None
+        r = ru_items[i] if i < len(ru_items) else None
+        e = en_items[i] if i < len(en_items) else None
+
+        if not (z or r or e):
+            continue
+
+        merged.append(
+            {
+                "title_zh": (z.get("title") if z else None),
+                "content_zh": (z.get("content") if z else None),
+                "title_ru": (r.get("title") if r else (z.get("title") if z else None)),
+                "content_ru": (r.get("content") if r else (z.get("content") if z else None)),
+                "title_en": (e.get("title") if e else (z.get("title") if z else None)),
+                "content_en": (e.get("content") if e else (z.get("content") if z else None)),
+                "emoji": (r.get("emoji") if r else (z.get("emoji") if z else (e.get("emoji") if e else None))),
+            }
+        )
 
     return merged
 
@@ -1422,26 +1615,48 @@ WORKER_PROFILES = [
     {"min": 1, "max": 3},  # Li Wei - mixed
 ]
 
-JOURNAL_NOTES = [
-    (4, "Хороший день, чувствую себя бодро"),
-    (3, "Обычный день, немного устал"),
-    (2, "Тяжёлый день, много стресса"),
-    (5, "Отличное настроение!"),
-    (1, "Очень плохо себя чувствую"),
+JOURNAL_NOTES_I18N = [
+    (4, {"ru": "Хороший день, чувствую себя бодро.", "en": "Good day — I feel energized.", "zh": "今天状态不错，感觉精力充沛。"}),
+    (3, {"ru": "Обычный день, немного устал(а).", "en": "An ordinary day — a bit tired.", "zh": "普通的一天，有点累。"}),
+    (2, {"ru": "Тяжёлый день, много стресса.", "en": "A hard day — lots of stress.", "zh": "很难的一天，压力很大。"}),
+    (5, {"ru": "Отличное настроение!", "en": "Great mood!", "zh": "心情很好！"}),
+    (1, {"ru": "Очень плохо себя чувствую.", "en": "I feel really bad.", "zh": "我感觉很糟糕。"}),
     (3, None),
-    (4, "Продуктивный день"),
+    (4, {"ru": "Продуктивный день.", "en": "A productive day.", "zh": "今天很有成效。"}),
 ]
 
-JOURNAL_PHRASES = [
-    "Сегодня получилось сосредоточиться на задачах.",
-    "Было сложно из-за дедлайнов, но в целом справился(ась).",
-    "Чувствую усталость, хотелось бы больше отдыха.",
-    "Поймал(а) себя на тревожных мыслях, сделал(а) паузу и стало легче.",
-    "Настроение нестабильное, но есть ощущение прогресса.",
-    "Немного раздражительность, возможно из-за сна.",
-    "Сон был лучше, энергии больше.",
-    "Было трудно общаться, хотелось побыть одному/одной.",
-]
+JOURNAL_PHRASES_I18N: dict[str, list[str]] = {
+    "ru": [
+        "Сегодня получилось сосредоточиться на задачах.",
+        "Было сложно из-за дедлайнов, но в целом справился(ась).",
+        "Чувствую усталость, хотелось бы больше отдыха.",
+        "Поймал(а) себя на тревожных мыслях, сделал(а) паузу и стало легче.",
+        "Настроение нестабильное, но есть ощущение прогресса.",
+        "Немного раздражительность, возможно из-за сна.",
+        "Сон был лучше, энергии больше.",
+        "Было трудно общаться, хотелось побыть одному/одной.",
+    ],
+    "en": [
+        "I managed to focus on my tasks today.",
+        "Deadlines were stressful, but I got through it.",
+        "I feel tired and could really use more rest.",
+        "I noticed anxious thoughts, took a short break, and it helped.",
+        "My mood was unstable, but I still feel some progress.",
+        "A bit irritable — maybe because of sleep.",
+        "Sleep was better, and I had more energy.",
+        "Social interaction felt difficult; I wanted to be alone for a while.",
+    ],
+    "zh": [
+        "今天能更专注地处理任务。",
+        "截止时间带来压力，但总体上还是应付过来了。",
+        "感觉很疲惫，需要更多休息。",
+        "注意到自己在焦虑反刍，停下来休息一下后好一些。",
+        "情绪有些波动，但还是感觉在进步。",
+        "有点烦躁，可能和睡眠有关。",
+        "睡得更好了，精力也多一些。",
+        "社交有点吃力，想一个人待一会儿。",
+    ],
+}
 
 
 def _rand_dt_between(start: datetime, end: datetime) -> datetime:
@@ -1451,27 +1666,150 @@ def _rand_dt_between(start: datetime, end: datetime) -> datetime:
     return start + timedelta(seconds=random.randint(0, span))
 
 
-def _make_note(base: str | None) -> str | None:
-    # Keep some empty notes
-    if base is None:
+def _parse_ru_date(s: str) -> date | None:
+    s2 = (s or "").strip()
+    if not s2:
         return None
-    # Vary length: sometimes short, sometimes longer with 2-4 extra sentences
+    # Examples: "2 февраля 2026", "23 февраля 2026", "6 апреля 2026"
+    m = re.match(r"^(\d{1,2})\s+([а-яА-ЯёЁ]+)\s+(\d{4})\s*$", s2)
+    if not m:
+        return None
+    day = int(m.group(1))
+    month_name = m.group(2).casefold()
+    year = int(m.group(3))
+    months = {
+        "января": 1,
+        "февраля": 2,
+        "марта": 3,
+        "апреля": 4,
+        "мая": 5,
+        "июня": 6,
+        "июля": 7,
+        "августа": 8,
+        "сентября": 9,
+        "октября": 10,
+        "ноября": 11,
+        "декабря": 12,
+    }
+    month = months.get(month_name)
+    if not month:
+        return None
+    try:
+        return date(year, month, day)
+    except Exception:
+        return None
+
+
+def _load_ivan_journals() -> list[dict]:
+    """
+    Load Ivan's journal entries from backend/ivan_info_{rus,eng,zh}.txt.
+    Returns list of:
+      {"date": date, "emoji": str|None, "ru": str, "en": str, "zh": str}
+    """
+
+    def read_text(rel_path: str) -> str | None:
+        p = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", rel_path))
+        if not os.path.exists(p):
+            return None
+        with open(p, "r", encoding="utf-8") as f:
+            return f.read()
+
+    ru_text = read_text("ivan_info_rus.txt")
+    en_text = read_text("ivan_info_eng.txt")
+    zh_text = read_text("ivan_info_zh.txt")
+    if not (ru_text and en_text and zh_text):
+        return []
+
+    def split_blocks(txt: str) -> list[str]:
+        parts = re.split(r"\n\s*⸻\s*\n", txt.strip(), flags=re.MULTILINE)
+        return [p.strip() for p in parts if p and p.strip()]
+
+    ru_blocks = split_blocks(ru_text)
+    en_blocks = split_blocks(en_text)
+    zh_blocks = split_blocks(zh_text)
+
+    out: list[dict] = []
+    n = min(len(ru_blocks), len(en_blocks), len(zh_blocks))
+    for i in range(n):
+        rb = ru_blocks[i]
+        eb = en_blocks[i]
+        zb = zh_blocks[i]
+
+        # date line: first line that matches ru date format
+        rb_lines = [ln.strip() for ln in rb.splitlines() if ln.strip()]
+        eb_lines = [ln.strip() for ln in eb.splitlines() if ln.strip()]
+        zb_lines = [ln.strip() for ln in zb.splitlines() if ln.strip()]
+
+        d = None
+        for ln in rb_lines[:5]:
+            d = _parse_ru_date(ln)
+            if d:
+                break
+        if not d:
+            continue
+
+        # emoji from "Настроение: 😣 ..."
+        emoji = None
+        for ln in rb_lines[:6]:
+            m = re.search(r"Настроение\s*[:：]\s*([^\s]+)", ln, flags=re.IGNORECASE)
+            if m:
+                emoji = m.group(1).strip()
+                break
+
+        def extract_body(lines: list[str]) -> str:
+            # drop "Иван"/"ivan" header if present, drop date line, drop mood line
+            body = []
+            for ln in lines:
+                if _parse_ru_date(ln):
+                    continue
+                if re.search(r"^\s*(иван|ivan)\s*$", ln, flags=re.IGNORECASE):
+                    continue
+                if re.search(r"Настроение\s*[:：]", ln, flags=re.IGNORECASE):
+                    continue
+                body.append(ln)
+            return "\n".join(body).strip()
+
+        ru_body = extract_body(rb_lines)
+        en_body = extract_body(eb_lines)
+        zh_body = extract_body(zb_lines)
+        if not ru_body:
+            continue
+
+        out.append({"date": d, "emoji": emoji, "ru": ru_body, "en": en_body, "zh": zh_body})
+
+    return out
+
+
+def _make_note_i18n(base_map: dict[str, str] | None) -> dict[str, str] | None:
+    # Keep some empty notes
+    if base_map is None:
+        return None
+
     extra_count = random.choices([0, 1, 2, 3], weights=[35, 35, 20, 10])[0]
-    parts = [base]
-    for _ in range(extra_count):
-        parts.append(random.choice(JOURNAL_PHRASES))
-    return " ".join(parts).strip()
+    out: dict[str, str] = {}
+    for lang in ("ru", "en", "zh"):
+        parts = [base_map.get(lang, "").strip()]
+        parts = [p for p in parts if p]
+        for _ in range(extra_count):
+            parts.append(random.choice(JOURNAL_PHRASES_I18N[lang]))
+        out[lang] = " ".join(parts).strip()
+    return out
 
 
 def seed_database(db: Session):
     """Populate DB with test data if no users exist."""
     existing_user = db.query(models.User).first()
     if existing_user:
-        # Keep users, but fix test canon language if needed.
+        # Keep users, but fix canon language / reload content if needed.
+        therapist = db.query(models.User).filter(models.User.role == models.UserRole.therapist).first()
+        therapist_id = therapist.id if therapist else existing_user.id
+
         if _needs_test_reseed(db):
-            therapist = db.query(models.User).filter(models.User.role == models.UserRole.therapist).first()
-            therapist_id = therapist.id if therapist else existing_user.id
             _reseed_tests_from_txt(db, therapist_id=therapist_id)
+
+        if _needs_materials_reseed(db):
+            _reseed_materials_from_txt(db, author_id=therapist_id)
+
         return
 
     logger.info("Database is empty, seeding test data...")
@@ -1500,10 +1838,13 @@ def seed_database(db: Session):
     all_tests = []
     for test_data in (_load_tests_from_txt() or []):
         # Canonical language in DB: RU. Translations for ZH/EN go into *_translations tables.
+        has_ru = bool((test_data.get("title_ru") or "").strip() or (test_data.get("description_ru") or "").strip())
+        canonical_lang = "ru" if has_ru else ("en" if (test_data.get("title_en") or "").strip() else "zh")
         test = models.Test(
             title=test_data.get("title_ru") or test_data.get("title_zh") or test_data.get("title_en"),
             description=test_data.get("description_ru") or test_data.get("description_zh") or test_data.get("description_en"),
-            therapist_id=therapist.id
+            therapist_id=therapist.id,
+            source_lang=canonical_lang,
         )
         db.add(test)
         db.flush()
@@ -1527,7 +1868,9 @@ def seed_database(db: Session):
             # Canonical question text/options: RU (fallback to ZH/EN if RU missing)
             base_text = q_data.get("text_ru") or q_data.get("text_zh") or q_data.get("text_en")
             base_options = q_data.get("options_ru") or q_data.get("options_zh") or q_data.get("options_en")
-            question = models.Question(text=base_text, options=base_options, test_id=test.id)
+            q_has_ru = bool((q_data.get("text_ru") or "").strip())
+            q_canonical_lang = "ru" if q_has_ru else ("en" if (q_data.get("text_en") or "").strip() else "zh")
+            question = models.Question(text=base_text, options=base_options, test_id=test.id, source_lang=q_canonical_lang)
             db.add(question)
             db.flush()
 
@@ -1547,9 +1890,45 @@ def seed_database(db: Session):
                     ))
         db.flush()
 
+    # Create materials + translations
+    for mat_data in (_load_materials_from_txt() or []):
+        base_title = mat_data.get("title_ru") or mat_data.get("title_zh") or mat_data.get("title_en")
+        base_content = mat_data.get("content_ru") or mat_data.get("content_zh") or mat_data.get("content_en")
+        emoji = (mat_data.get("emoji") or "").strip() or None
+        if not base_title or not base_content:
+            continue
+
+        has_ru = bool((mat_data.get("title_ru") or "").strip() or (mat_data.get("content_ru") or "").strip())
+        canonical_lang = "ru" if has_ru else ("en" if (mat_data.get("title_en") or "").strip() else "zh")
+        mat = models.Material(
+            title=base_title,
+            content=base_content,
+            emoji=emoji,
+            author_id=therapist.id,
+            source_lang=canonical_lang,
+        )
+        db.add(mat)
+        db.flush()
+
+        for lang, title_key, content_key in (
+            ("zh", "title_zh", "content_zh"),
+            ("en", "title_en", "content_en"),
+        ):
+            t_title = mat_data.get(title_key)
+            t_content = mat_data.get(content_key)
+            if t_title and t_content:
+                db.add(
+                    models.MaterialTranslation(
+                        material_id=mat.id,
+                        lang=lang,
+                        translated_title=t_title,
+                        translated_content=t_content,
+                    )
+                )
+
     # Workers take tests
-    # Wider range of dates: Feb -> Apr (inclusive)
-    start_dt = datetime(2026, 2, 1, 9, 0, 0)
+    # Wider range of dates: Dec -> Apr (inclusive)
+    start_dt = datetime(2025, 12, 1, 9, 0, 0)
     end_dt = datetime(2026, 4, 9, 21, 0, 0)
 
     for i, worker in enumerate(workers):
@@ -1573,16 +1952,62 @@ def seed_database(db: Session):
                 db.add(result)
 
         # Journal entries
-        for _ in range(random.randint(25, 55)):
-            score, note = random.choice(JOURNAL_NOTES)
+        is_ivan = (worker.full_name or "").strip().casefold().startswith("иван ")
+        if is_ivan:
+            ivan_entries = _load_ivan_journals()
+            for je in ivan_entries:
+                # keep exact dates from the file, add random daytime time
+                hh = random.randint(9, 21)
+                mm = random.choice([0, 10, 20, 30, 40, 50])
+                created_at = datetime(je["date"].year, je["date"].month, je["date"].day, hh, mm, 0)
+
+                ru_text = (je.get("ru") or "").strip()
+                if je.get("emoji"):
+                    ru_text = f"{je['emoji']} {ru_text}".strip()
+
+                entry = models.Journal(
+                    wellbeing_score=random.randint(2, 4),
+                    note_text=ru_text,
+                    source_lang="ru",
+                    user_id=worker.id,
+                    created_at=created_at,
+                )
+                db.add(entry)
+                db.flush()
+
+                en_text = (je.get("en") or "").strip()
+                zh_text = (je.get("zh") or "").strip()
+                if en_text:
+                    db.add(models.JournalTranslation(journal_id=entry.id, lang="en", translated_note_text=en_text))
+                if zh_text:
+                    db.add(models.JournalTranslation(journal_id=entry.id, lang="zh", translated_note_text=zh_text))
+
+            # plus some extra random short/long entries to mix it up
+            extra_cnt = random.randint(10, 20)
+        else:
+            extra_cnt = random.randint(25, 55)
+
+        for _ in range(extra_cnt):
+            score, note_map = random.choice(JOURNAL_NOTES_I18N)
+            note_i18n = _make_note_i18n(note_map)
             created_at = _rand_dt_between(start_dt, end_dt)
             entry = models.Journal(
                 wellbeing_score=score,
-                note_text=_make_note(note),
+                note_text=(note_i18n.get("ru") if note_i18n else None),
+                source_lang="ru",
                 user_id=worker.id,
                 created_at=created_at,
             )
             db.add(entry)
+            db.flush()
+
+            if note_i18n:
+                en_text = note_i18n.get("en")
+                zh_text = note_i18n.get("zh")
+                if en_text:
+                    db.add(models.JournalTranslation(journal_id=entry.id, lang="en", translated_note_text=en_text))
+                if zh_text:
+                    db.add(models.JournalTranslation(journal_id=entry.id, lang="zh", translated_note_text=zh_text))
 
     db.commit()
     logger.info("Seed data created successfully!")

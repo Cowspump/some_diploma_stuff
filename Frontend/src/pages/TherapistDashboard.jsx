@@ -31,7 +31,8 @@ const TherapistDashboard = ({ user, onLogout }) => {
   const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
   const [showEditMaterialModal, setShowEditMaterialModal] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState(null);
-  const [newMaterial, setNewMaterial] = useState({ title: "", content: "" });
+  const MATERIAL_ICONS = ["🔥", "🧘", "😴", "🌿", "📘", "💡", "🧠", "🎯", "🥱", "🍃", "📕"];
+  const [newMaterial, setNewMaterial] = useState({ title: "", content: "", emoji: "📘" });
 
   // Users state
   const [workers, setWorkers] = useState([]);
@@ -73,7 +74,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
       await apiService.post("/materials", newMaterial);
       setSuccess(`${t("therapist_material_created")} ${t("therapist_translation_hint")}`);
       setShowAddMaterialModal(false);
-      setNewMaterial({ title: "", content: "" });
+      setNewMaterial({ title: "", content: "", emoji: "📘" });
       await loadMaterials();
     } catch (err) {
       setError(err.message || "Error");
@@ -97,7 +98,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
   };
 
   const openEditMaterial = (m) => {
-    setEditingMaterial({ id: m.id, title: m.title, content: m.content });
+    setEditingMaterial({ id: m.id, title: m.title, content: m.content, emoji: m.emoji || "📘" });
     setShowEditMaterialModal(true);
   };
 
@@ -108,6 +109,7 @@ const TherapistDashboard = ({ user, onLogout }) => {
       await apiService.put(`/materials/${editingMaterial.id}`, {
         title: editingMaterial.title,
         content: editingMaterial.content,
+        emoji: editingMaterial.emoji,
       });
       setSuccess(`${t("therapist_material_updated")} ${t("therapist_translation_hint")}`);
       setShowEditMaterialModal(false);
@@ -919,6 +921,21 @@ const TherapistDashboard = ({ user, onLogout }) => {
                 style={{ borderRadius: "10px" }}
               />
             </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Emoji</Form.Label>
+              <Dropdown>
+                <Dropdown.Toggle variant="outline-secondary" style={{ borderRadius: "10px" }}>
+                  {newMaterial.emoji || "📘"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu style={{ maxHeight: 220, overflowY: "auto" }}>
+                  {MATERIAL_ICONS.map((ic) => (
+                    <Dropdown.Item key={ic} onClick={() => setNewMaterial({ ...newMaterial, emoji: ic })}>
+                      {ic}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            </Form.Group>
             <Form.Group>
               <Form.Label className="fw-semibold">{t("materials_field_content")}</Form.Label>
               <Form.Control
@@ -957,6 +974,24 @@ const TherapistDashboard = ({ user, onLogout }) => {
                 onChange={(e) => setEditingMaterial({ ...editingMaterial, title: e.target.value })}
                 style={{ borderRadius: "10px" }}
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Emoji</Form.Label>
+              <Dropdown>
+                <Dropdown.Toggle variant="outline-secondary" style={{ borderRadius: "10px" }}>
+                  {editingMaterial?.emoji || "📘"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu style={{ maxHeight: 220, overflowY: "auto" }}>
+                  {MATERIAL_ICONS.map((ic) => (
+                    <Dropdown.Item
+                      key={ic}
+                      onClick={() => setEditingMaterial({ ...editingMaterial, emoji: ic })}
+                    >
+                      {ic}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
             </Form.Group>
             <Form.Group>
               <Form.Label className="fw-semibold">{t("materials_field_content")}</Form.Label>

@@ -1,0 +1,424 @@
+1. НАЗВАНИЕ: What is insomnia? Why does it happen?
+
+СМАЙЛИК: 🥱
+
+ТЕКСТ (соблюдая абзацы и перенос):
+
+Insomnia is a sleep disorder characterized by persistent difficulty falling asleep, difficulty maintaining sleep, or waking up prematurely and unable to fall asleep again.The key criterion is that these problems still occur with sufficient sleep time and conditions, and can lead to significant daytime impairment (such as fatigue, irritability, and difficulty concentrating).
+
+Why is this happening?The mechanism of insomnia is complex and multiple factors are intertwined.It usually begins with an acute attack, triggered by stress, illness, or lifestyle changes.For most people, sleep will return to normal after the stressor disappears.But for some people, a vicious circle of “insomnia in the brain” will form.In order to clarify the cause of insomnia and formulate a treatment plan, a professional evaluation is recommended.
+
+The main physiological and psychological mechanisms of chronic insomnia include：
+ 1. Excessive arousal of the central nervous system.The brains of people with insomnia are not only highly alert during the day, but also at night.The activity of the sympathetic nervous system (“fight or flight” response) is enhanced, hindering the natural process of falling asleep.
+ 2. Conditioned reflexes of discomfort.Beds and bedrooms that should have been associated with relaxation and sleep have instead become triggers for anxiety and restlessness.Lying awake in bed for a long time will inadvertently form a conditioned reflex of "bed = pain, struggle, frustration".
+ 3. Dysfunctional beliefs and cognition about sleep.For example: “I have to sleep for 8 hours.“ ”If I don't sleep well tonight, it will be over tomorrow.“ ”My body will never recover."These cataclysmic thoughts are themselves a strong source of anxiety, but hinder falling asleep.
+ 4. Compensatory sex that exacerbates the problem.People with insomnia often take some behaviors instinctively, but instead consolidate the problem: go to bed prematurely in order to “replenish sleep”, stay in bed for a long time after waking up and try to fall asleep again, relax with alcohol at night, and consume a lot of coffee or take a nap during the day.These can disrupt the natural circadian rhythm and sleep homeostatic stress.
+
+What should I do?Operation guide：
+
+Only go to bed when you feel strongly sleepy.
+The bed is only used for sleep and sex.Do not watch TV, use a computer, eat or play with your mobile phone in bed.
+If you can't fall asleep within 15-20 minutes (subjective estimation, don't look at the time), please get up and leave the bedroom.
+Do something relaxing and monotonous in dim light (such as reading a boring book or listening to light music).Don't turn on strong light and don't check social media.
+Only when I feel sleepy again do I return to bed.
+Repeat the above steps as needed throughout the night.
+Get up at a fixed time every morning, no matter how long you slept the night before.
+
+Expert advice: The most common mistake is to lie in bed all the time and “work hard” to fall asleep.This will only increase frustration.Getting up is the key behavior to break this pattern.At first, you may feel that sleep is more fragmented, but this is the stage necessary to rebuild the conditioned reflex.
+ 2. Sleep restriction (improve sleep efficiency)
+
+This method may seem counterintuitive, but the effect is significant.The goal is to improve “sleep efficiency" (that is, the proportion of actual sleep time to bed time).If a person lies in bed for 9 hours but only sleeps for 6 hours, his sleep efficiency is 67%.The goal is to increase it to 85%-90%.
+
+How to implement：
+
+Record a sleep diary for 1-2 consecutive weeks, recording the approximate time to fall asleep and wake up.
+Calculate the average actual sleep time per night (for example, 5.5 hours).
+Set a strict bed time according to this time.For example, if you sleep for an average of 5.5 hours and want to get up at 7:00, you should go to bed at 1:30.
+Lack of sleep may occur in the early stages, thereby increasing the homeostatic pressure (the need for sleep) during sleep.
+
+This will help to fall asleep faster and make sleep deeper and more continuous.
+With the improvement of sleep efficiency (reaching 90% and above), gradually increase bed time (increase by 15-30 minutes per week).
+
+This method requires self-discipline and may be more difficult in the early stage, but it can readjust the sleep regulation system.
+
+2. НАЗВАНИЕ: Why conflicts in the workplace are normal and how to manage them
+
+Смайлик: 🔥
+
+ТЕКСТ:
+
+Avoiding conflicts in the team often brings bigger problems.Let's take a look at why differences arise, what value they have, and what conflict management methods can be used in the organization.
+
+What is a team conflict
+
+Conflict refers to situations where conflicts arise between people due to different views, positions, interests, or goals.In any team, differences are normal.This is because each member has a different experience and understanding of life, and the interaction between people is like exchanging encrypted information: one person encodes it with their own “symbols”, and the other decodes it according to their own understanding.
+
+The correct understanding of information may be affected by the state of both parties in the dialogue and cognitive biases.This leads to a common situation: one person expresses one layer of meaning, but the other party understands it as another layer of meaning, which leads to conflict.
+
+Causes of conflicts in the team
+
+Conflicts with colleagues have both objective and personal reasons.The former includes differences at the work level, while the latter is related to emotional, behavioral, and personal differences.
+
+Objective reasons
+Responsibilities are not clearly assigned
+Every employee should be clear about their scope of responsibilities.If the responsibilities are unclear, it is easy to cause conflicts.Tasks may be performed by no one or repeated by multiple people.
+
+Unfulfilled promises
+There are usually agreements between departments or between employees and management: who is responsible for what tasks, when to complete them, and what rewards to get.If either party fails to fulfill its commitment, a conflict will arise.
+
+For example: Employees in the distribution department need to submit a transportation expense report before the 1st of each month in order to be reimbursed on the 15th.Employees submitted on time, but the finance department continued to delay payment, causing conflicts.
+
+Task assignment is not clear
+In order to achieve the expected results, managers or employees need to clearly state the content and deadline of the task, while ensuring that both parties understand the same.
+
+Insufficient resources
+The company has many goals but limited resources, such as insufficient funds, manpower or time.When management assigns priorities, conflicts between departments often arise.
+
+For example: During the holidays, the company added a new customer.The marketing department is already too busy, and the management hopes that the SMM department will assist, but the department also has a large number of tasks that cannot be postponed, so employees refuse to take over new customers, which may cause conflicts.
+
+Personal reasons
+Colleague relationship issues
+There may be differences in values, lifestyles, or perceptions of events between employees.For example, there is a staunch vegetarian in the marketing department who is trying to persuade colleagues to change their eating habits.At first everyone thought it was a joke, but gradually the relationship deteriorated and conflict broke out.
+
+Emotional tension
+Tired, dissatisfied, or anxious employees are more likely to be involved in conflicts.Even small things can be the trigger.
+
+For example: The tester found a vulnerability, but the developer has been unable to fix it.During a meeting, someone joked: "Why haven't you done it yet?"The tired developer's emotions broke out, and conflict ensued.
+
+Improper feedback
+Mistakes are inevitable at work, so both employees and managers need to learn to give reasonable feedback.For example: “I have never seen such a bad job, how could you do it like this?"”This kind of expression not only does not help to improve, it will also hurt the other party and exacerbate the contradiction.
+
+Conflict resolution steps
+
+Both employees and managers should learn to identify differences and master the principles of conflict management.This can promote team development, reduce the risk of team collapse, and create a good working atmosphere.
+
+Different types of conflicts require different management methods.If the conflict is destructive, it should be transformed into a constructive conflict, which can be carried out in the following steps：
+ 1. Control emotions
+Slow down the rhythm through breathing and understand that the opponent's behavior stems from emotions, not malicious destruction.
+ 2. Express goodwill
+Communicate in a calm tone and avoid evaluative words.
+For example, change “You speak too fast and I don't understand” to “Please say again what you did so that I can respond more accurately.”
+ 3. Let the other party express emotions
+Anger is a strong emotion that will gradually subside after release.Don't rush to explain or comfort, let the other party finish first.
+ 4. Ask questions that guide thinking
+For example: “What exactly happened?Can you talk about it step by step?”This helps relieve tension.
+ 5. Recognize the other party's situation
+Express understanding and respect, and don't rush to justify or promise things that cannot be achieved.
+For example: “I understand, this is indeed a very tricky situation.”
+ 6. Identify the problem and find a solution
+For example, explain the time to solve the problem, or propose a variety of feasible solutions.
+
+The operation of the team can be compared to a car: only when all the parts are functioning normally can the car move forward.Conflict is like a warning light on the dashboard, it reminds us what went wrong.The task of the team and managers is not to ignore this signal, but to identify the problem and solve it so that the team can operate smoothly.
+
+Take the conflict as a signal, it is reminding you: it is worth taking a deeper look here.
+
+
+3. НАЗВАНИЕ: "Body Scan”: A Mindfulness and relaxation exercise
+
+Смайлик :🍃
+
+ТЕКСТ:
+
+You must have heard the buzzword “mindfulness” many times.If you are not familiar with this topic, it will probably remind you of some exercises in yoga.In this article, I will not talk in detail about why I want to live in the present and its meaning, but introduce a specific technique that is particularly helpful for the following people：
+-Anxiety；
+-Depression；
+-Generalized anxiety disorder (GAD)；
+-Obsessive-compulsive disorder (OCD).
+
+In addition, this exercise is also applicable to people who have been under pressure for a long time and bear a greater psychological burden.
+
+Why is it important to do this exercise at least once a day if you have long-term anxiety or depression?
+The answer is simple: in this state, you either stay in the past (repeatedly recalling and “chewing” the negative experiences of the past), or you are immersed in worries about the future, and the future in your eyes is full of uncertainty, danger, and anxiety.You don't seem to be “at this moment” at all.In this context, there is often a disintegration of reality (feeling that the surrounding world has lost its color, as if watching a movie) or a disintegration of personality (feeling that the body is not like one's own).
+
+To return to a normal life without anxiety, you need to practice mindfulness, which can bring you back to the present from the past and worries about the future day by day, and back to your real life.
+The technology I want to introduce is called “body scanning”.
+
+How to proceed?
+
+Step 1
+Turn off the electronic device.Lay a cushion on the ground, lie on your back, your arms spread out naturally, your palms facing up.It can also be done by sitting in a chair (for example, during work breaks).Separate your feet and step on the ground with the soles of your feet, so that you can clearly feel the support.
+
+Step 2
+Try to stay still throughout the exercise.If you feel unwell or need to move a certain area, you can adjust it appropriately.Take a few deep breaths, feel the operation of the lungs, and feel the ups and downs of the chest cavity.Breathe with awareness.You can say in your heart or softly: I feel my chest ups and downs, I feel my lungs full of air, I hear my breathing……
+Observe the rhythm of breathing, but don't deliberately change it.Breathe naturally and smoothly.Try to focus on breathing and liberate consciousness from messy thoughts.At this moment you are completely in the moment, focusing on breathing and body reactions, and there are no extra thoughts in your brain.
+
+Step 3
+Now start to pay attention to the body.Feel the touch of clothing touching the skin, the feeling of muscles, the feeling of air touching the skin, experience the indoor temperature, and observe where there is tension in the body.
+“Scan” all parts of the body one by one in your mind, analyze its state and your feelings.“Scan” the whole body completely.If there is tension somewhere, try to relax it.Pay attention to which parts are particularly tight, and think about possible causes.
+Scans can be performed in sequence, such as from the top of the head to the foot, or from the foot to the head.
+
+Step 4
+After completing the body scan, pay attention to the sounds of the outside world.Find out at least 3 sounds you can hear at the moment (even if it's a heartbeat or a faint wind outside the window).Then inhale with your nose and try to distinguish the smell in the air.What is that smell?
+
+Step 5
+Slowly open your eyes and observe your surroundings.Let your gaze wander between objects and choose an object that makes you feel comfortable.
+
+Observe it carefully and describe it in your heart：
+-What is its texture?
+-How does it feel to touch?
+-Why does it attract your attention?
+-How does light reflect on its surface?
+-What is its color and shape?
+-What material is it made of?
+
+At the end of the exercise, take another deep breath.
+In order to consolidate the effect, it is recommended to do it 1 to 2 times a day.
+
+4. НАЗВАНИЕ: ”Not good enough" syndrome
+
+СМАЙЛИК: 💡
+
+ТЕКСТ:
+
+How often do you revise your work repeatedly?How much time will it take before polishing it to "perfect”?
+Do you have such thoughts: “This is not good enough”, ”It seems that I haven't invested enough time“, ”I could have done better“, ”Need to redo, supplement, modify" and so on?
+
+The voice of the inner critic will make you constantly doubt your professional ability, ask you to be perfect in everything, make you feel guilty, ashamed, and responsible for others, make you doubt whether your thoughts, behaviors, and decisions are correct, and belittle your achievements.
+
+So, who is this voice?Where does it come from?
+
+The inner voice, once the external voice of an important other person, was later internalized into your inner voice, the purpose of which is to make you meet certain standards.
+
+These standards may not even belong to you, but they determine how you should behave at work, at home, and in the family.
+
+One form of inner critic is neurotic perfectionism, whose core beliefs include: “This is not good enough”, "Everything must be perfect”, “No mistakes are allowed”, and manifested as：
+-Tend to make unrealistic high demands, so as to always be dissatisfied with the results；
+-Avoid mistakes, even trivial negative feedback will be subjectively regarded as a failure；
+-Have doubts about your own behavior, such as constantly doubting the quality of the work done；
+-The pursuit of using results to measure, evaluate and compare, rather than simply gaining experience and enjoying the process；
+-Belittle your own achievements: “It's easy to do”, “No, it's not good enough”, “The result is very general”.
+
+The root of neurotic perfectionism is the fear of rejection, as well as some uncomfortable beliefs, such as：
+I have to make my work perfect
+I must be the best
+I must be perfect
+If I'm not perfect, then I'm a loser
+If I am a loser, then I am useless and no one needs it
+
+How to fight against inner critics
+-When the inner critic appears, use the “inner defender” to refute its false beliefs and give reasonable arguments.
+-Imagine in your mind that you turn down the voice of your inner critic.
+-Establish an "inner mentor" (idol or authoritative image) to encourage, praise, and motivate yourself.
+
+Let your inner voice become louder-for this, you need to understand your own wishes, listen to your own needs, and set your own goals.In this regard, you can use the help of a psychological counselor.
+
+You can say it to yourself, or write it down and put it in a prominent place：
+I have the right to make mistakes, I allow myself to make mistakes
+I have the right to be imperfect
+I am only responsible for myself
+My thoughts and actions are valuable in themselves
+Perfection is the enemy of good.Instead of doing nothing, it's better to do it normally
+
+Exercise: "Dialogue with inner critic”
+ 1. Draw or imagine the image of your inner critic
+ 2. Enter a safe space in your mind and stay there for a while
+ 3. Invite inner critics to have a dialogue
+ 4. Observe its appearance and who it looks like
+ 5. What does it want from you?What do you want from it?
+ 6. How can you help it?
+ 7. Can you reach some kind of cooperation?
+ 8. Thank it for this conversation
+
+
+5. НАЗВАНИЕ: How not to let negative thinking ruin your life
+
+Смайлик: 🧠
+
+ТЕКСТ:
+
+Negative thinking is a way of thinking that will not make life better. It is often based on the past experience of oneself or others.This is a set of beliefs or psychological settings that will only form restrictions.
+
+When a person has experienced pain, the brain instinctively tries to avoid experiencing this pain again and looks for ways to avoid it.But the brain tends to lead us in a familiar direction-that road has already been walked and flattened.
+
+Negative thinking can also affect the brain and form behavioral patterns as a result.：
+ 1. Repeated playback of negative events in the brain will focus attention on negative content.Consciousness gradually gets used to this pattern and operates according to the existing thinking path.
+ 2. The neural structures responsible for memory, emotion, and emotional control can be damaged.
+ 3. Increased secretion of cortisol.This hormone damages the hippocampus-the part of the limbic system responsible for forming new memories.The more negative thoughts, the more difficult it is for the body to restore normal stress hormone levels, and the slower positive memories are formed.
+ 4. New synapses are abnormally generated, and the genetic structure is affected, which leads to negative changes in the structure of the brain.
+
+However, people often don't understand these things, and instead let themselves fall into misunderstandings.
+It seems to be doing a good thing-avoiding pain by rethinking the problem, but in fact, the brain just clings to the pain, rather than directly experiencing it.In this way, people cannot truly experience and end all this, nor can they move on.
+
+As a way of “taking care of oneself”, people instead seize the pain and let it go.It seems that once you no longer return to those pains and memories, you are tantamount to betraying yourself, not being cautious or visionary enough.
+
+When a person focuses on the negative, he is actually constantly in psychological confrontation with reality: looking for the person to blame, spending a lot of time and energy to explain why everything is so bad, denying the possibility of change, and always finding all kinds of unrealistic reasons to explain why it can't get better.
+He refuses any opportunity to improve, and can always find reasons to explain that this is not good and will cause problems.In any possibility of changing his life, he can always find a reason to prove that he can't do it.
+
+Returning to the negative again and again, resulting in cognitive biases such as “catastrophized thinking” or “excessive speculation”, people seem to be looking for evidence to prove their existence-because he is thinking.But these thoughts are affected by fear and anxiety, so the entire thinking system is also dominated by negative emotions.
+
+In essence, this is a kind of dependence on emotions-dependence on pain and anxiety.
+Indulging in this kind of pain seems to be trying to make yourself feel better, but the result is to make yourself feel worse and suffer more pain than necessary.
+
+So, how to change this way of thinking?
+
+There are methods and specific steps：
+ 1. Stay aware and live in “this moment”.Don't indulge in the past, don't over-anticipate the future, and focus on what is happening in the present.
+ 2. Admit that there is a deviation in one's thinking, which hinders the formation of new behavior patterns, and consciously learn and try new ways.
+ 3. Allow yourself to change.Face the traumas and negative memories in life, experience them, complete them, and use them as experiences instead of returning to them repeatedly.
+ 4. Focus on the present, without criticism or looking for shortcomings, but understand that you have a responsibility to change your life.
+ 5. Build trust in yourself and basic trust in the world.
+ 6. Admitting that you are in the role of “victim” and in a state of escape will only make you lose the opportunity to live and create.
+
+All this is possible, the key is to try and continue to practice.
+
+
+6. НАЗВАНИЕ: How to set goals correctly
+
+СМАЙЛИК: 🎯
+
+ТЕКСТ:
+
+Imagine that you are very eager for something and have “carried" this wish in your heart for many years.Subsequently, guilt gradually appeared, and this dream became a heavy burden.
+We will explore how to set goals and why it is not easy to achieve them.What are the common goal setting errors?How can I avoid the guilt of not starting late, or giving up halfway after starting?
+
+What is goal setting
+Goal setting is the process of clarifying one's intentions.Goals and values have a lot in common.Through goals, we can realize where we should put our energy and what time should be spent on.
+A goal is the result that a person hopes to achieve within a certain period of time.
+Goals can help us treat life more consciously.
+
+The difference between goals and dreams
+If you have ever made a wish list, it means that you are already using dreams as a way of planning.So what is the difference between the two?
+A dream is an imagination of what you want, often with idealized colors.
+The main feature of dreams is uncertainty.It has no time limit and is often seen as something far away or even difficult to achieve.For example: move to another country, become an actor, and start your own company.
+The goal is different, it is specific, measurable, and has a time limit.No one needs to give up their dreams, nor should they give up.When you start to disassemble your dreams, you will find that they actually contain goals.
+
+How to set and achieve goals: Practical Tips
+When starting to plan, many people are prone to tension, disappointment, decreased motivation, and even denial of their dreams.
+Here are some tips to help you set and achieve your goals correctly：
+
+Use the SMART method
+SMART representative：
+-S (specific) specific
+-M (measurable) measurable
+-A (achievable) achievable
+-R (relevant) related
+-T (time-bound) There is a time limit
+
+For example, a goal that conforms to the SMART principle can be expressed like this: “In the next month, perform 30 minutes of exercise 3 times a week to improve your physical condition.”
+
+Visualization goals
+Every time you think of a goal, try to immerse yourself in an ideal state.How do you want to feel?What is yourself like in your mind?
+
+What's your “big deal”
+Ask yourself: "Why do I need this goal?What is the deeper meaning behind it?What fundamental needs do I want to meet?What value do I want to realize?”And think carefully about these answers.
+
+Establish a reward mechanism
+It can be simple but enjoyable things: buy a new book, go to a favorite cafe to rest, read a book, or give yourself a day off.
+
+Micro-step method
+The "micro-step" method is to replace grand tasks with a series of small but meaningful actions.Some steps can even be completed right away.
+For example, if the goal is to run a marathon, the traditional method may be to “develop a training plan for a few months...”.In the "micro-step" method, one step can just put on running shoes and go out for a five-minute run.
+From a psychological point of view, these steps are so small that it is difficult for you to find an excuse for “not doing it.”
+
+What will prevent you from achieving your goals
+Strong desire itself has accounted for 70% of success, but the remaining 30% is often the key.
+
+Obstacles include：
+-Lack of clear goals
+Vague directions can bring frustration and make people doubt their abilities.
+-Fear of failure
+This kind of fear can make people stagnate or even avoid action.It is often related to perfectionism.But “doing it imperfectly“ is better than ”not doing it at all."No one asks you to get a full score from the beginning.
+-Procrastination is not entirely the enemy
+Sometimes, laziness is protecting you from doing things that are imposed by the outside world.Allow yourself to stop occasionally and think about what you really want, maybe you will find a new goal.
+-Environmental impact
+When you decide to change your life, the people around you will have a great impact on you.The support of family, friends and colleagues can give you the strength to move on.At the same time, pay attention to whether someone is inadvertently weakening your confidence and hindering your growth.
+-Lack of work-rest balance
+If you blindly chase your goals without giving yourself time to rest, sooner or later you will feel tired.
+
+It is important to always ask yourself: Why should I do this?Who do I want to make happy or surprise?I want to prove that I can be a kind of motivation, but the essence of goal setting is not this.It is about understanding the priorities of life, recognizing one's own values, and making choices to focus on the actions that really matter.
+
+
+7. НАЗВАНИЕ: Psychology Self-improvement Books
+
+Смайлик: 📕
+
+ТЕКСТ: 
+
+Adjustment of thinking, behavior patterns and emotions：
+ 1. "Out of the Cycle of Trouble", Jeffrey Young
+This book will help you understand why we always repeat the same mistakes and how to break this vicious circle and thereby improve your life.The book contains a lot of exercises and tasks.
+ 2. "Good Mood: New Emotional Therapy", David Burns
+This book helps you deal with depression, anger, low self-esteem, sadness and other problems.The author provides many practical and effective methods.
+ 3. "If it were...", Arthur Freeman
+Suitable for those who are always immersed in the past and regret “if...”.The author explained how to get rid of this mode of thinking and start to realize his wishes.
+ 4. "The 10 Stupidest Mistakes People Often Make", Arthur Freeman
+Similar to the previous three books, this book introduces a more simplified method of cognitive behavioral therapy, which is suitable for self-application to improve emotional state.
+
+About anxiety, fear and phobias：
+ 1. "Getting Rid of Anxiety: Defeating Anxiety Before It Overwhelms You", Robert Leahy
+You will learn how to ”deceive" fear and master ways to deal with stress.This book provides a simple step-by-step guide to help you overcome various anxieties.
+ 2. "Cognitive Behavioral Therapy for Anxiety: A Step-by-Step Plan", William J. Knaus
+This is an exercise manual that first introduces the basic theory of anxiety, then helps you identify the source of anxiety through tests, and then provides coping methods and exercises one by one.
+ 3. "Cognitive Behavioral Therapy: Overcoming Anxiety, Fear, Worry and Panic", Matthew McKay
+This book teaches you how to recognize anxiety signals, assess threats, and control emotional and physiological responses through cognitive behavioral therapy.At the same time, the “face-to-face method” in the book helps you overcome anxiety as quickly and effectively as possible.
+
+About self-evaluation and self-confidence：
+ 1. "The Core Secret of Absolute Self-confidence", Robert Anthony
+After reading, you will understand the manifestations of low self-esteem (sometimes very hidden), learn to recognize the manipulative behaviors of others, and master the methods of setting and achieving goals.
+ 2. "Please Praise me: How to get rid of the Dependence on Other People's Evaluation and Build Self-confidence", James Rapson, Craig Inglis
+This book tells how to no longer please everyone, no longer be a “good old man”, but to establish peace and harmony with yourself.The author proposes 7 practical exercises.
+ 3. "The Formula for Happiness: Accepting Yourself Three Times a Day", Ekaterina Sigitova
+This book has helped me a lot. It contains a lot of methods and exercises to help you explore and accept yourself and life.
+ 4. "Love Imperfect: Accepting the Imperfections of Oneself and Others", Xuan Mingshan
+This book is different from others in that it was written by a Zen practitioner.Although there are no specific exercises, it contains many warm and wise words to help you re-examine yourself and others.
+
+
+8. НАЗВАНИЕ: Meditation: Three Techniques used by Psychologists
+
+Смайлик: 🧘
+
+ТЕКСТ:
+
+For Buddhists, meditation is the foundation of religious practice.But it is also an effective way to overcome psychological tension, stress, and ease strong emotional experiences.Psychologists have also incorporated meditation techniques into practice.Three of them are described below.
+
+1. Luxury Mota-Gain Concentration
+Somata is one of the basic forms of meditation.Psychologist Daniel Gorman pointed out that its goal is to bring the mind back to the highest point of focus, which is “focus.”During meditation, the prefrontal lobes in the brain responsible for self-control and willpower are trained.
+
+In a world where information is constantly pouring in from mobile phone screens, televisions, billboards, and newspapers, it is particularly important to learn to stop, prioritize, and move towards goals.The distraction of attention may make us realize too late that life has become chaotic.We are like a boat in a storm, and it is difficult to control the situation.
+
+Meditation is a tool to help us calm this storm and focus on important things, allowing us to stand in the position of “observer”.
+
+Experienced practitioners remind that the effect will not appear immediately, but will be gradually obtained through regular training: you should practice at roughly the same time every day and gradually increase the intensity of the exercise.
+
+“Practice of focusing on the mind”
+Set aside time, find a place where you won't be disturbed, sit up straight, close your eyes, and focus on breathing.Inhale, exhale, inhale again, exhale again.Our consciousness has a rhythm, and such a breathing cycle will make it feel comfortable.
+
+Observe how air enters and exhales through the nose, and how it fills the lungs and diaphragm.
+
+Thoughts and memories are likely to distract you, which is normal.Just bring your attention back to breathing.At the end, slowly open your eyes, sit for a while, and thank yourself for your practice.
+
+
+2. Work with emotions
+Buddhism attaches great importance to the cultivation of emotions.It believes that anger and jealousy will blind the mind, while love and joy will purify the mind.Compassion for others is an important quality of Buddhists.
+
+When a person is immersed in frustration or anger, it is impossible to be truly generous and caring for others.
+
+Meditation can expand the range of emotions and enhance the experience of joy, happiness, unconditional love and acceptance.Buddhist tutors recommend practicing compassion, joy, and equality together because they support each other.
+
+Compassion Meditation (Metta)-Meditation on the Kindness of Love
+This kind of exercise is especially valuable if you want to improve your relationship with others and make the relationship warmer and more understanding.
+
+Find a quiet place, sit upright, and close your eyes.Focus on breathing for the first few minutes and let your heart slowly calm down.When distractions decrease, send blessings to yourself: May you be happy, healthy, and happy.You can meditate in your heart: “May I be happy”, “May I be healthy”, it is best to match the rhythm of breathing.If negative feelings arise, melt them in your love for yourself.
+
+Then imagine your best friend or loved one, give him love, and wish him happiness and health.If the body is nervous, observe it and let it slowly dissipate in love and joy.Then imagine an ordinary acquaintance: a colleague, a clerk in a nearby store, or a neighbor-someone you don't have special emotions for, and wish him happiness, freedom and happiness.
+
+It is not easy to fall in love with people who are not familiar with it, but it will gradually become natural with practice.
+
+The most difficult thing is to bless people you don't like, but this is precisely the key to cultivating compassion.Actor Richard Gere has been practicing Buddhism for a long time. He will wish everyone happiness in his heart, and he said that it is himself who brings happiness first.
+
+Sincerely wishing the happiness and health of those who have hurt you is a breakthrough in emotional control.This is also the penultimate stage of compassionate meditation, after which you can extend your blessings to all living beings.Stay in this state, observe your own changes, and thank yourself for your practice.
+
+
+3. Analytical meditation
+When you have mastered focused breathing, you can enter a higher level of meditation.This is part of Vipassana and aims to develop awareness and wisdom.
+
+Meditation that cultivates empathy
+Sit up straight and practice breathing and concentration first to calm your mind.When you are ready, focus on one idea.For example, recall an experience where you once suffered but someone cared about you.How did you feel at the time?How does that person feel?How did this incident change him?
+
+Think back to your experience of caring about others.How did the other party react?How do you feel?Think about how many sentient beings are suffering every day, and wish them freedom from pain in their hearts and lend them a helping hand.
+
+Stay in the meditative state long enough.
+
+Take a few deep breaths and gently return to reality.Thank you for your practice.Then pay attention to the qualities produced in meditation and continue to cultivate it.
+
+Meditation is not an unchanging practice.As the practitioner grows, the method will continue to deepen.Its ultimate goal is to integrate this way of thinking into life so that people can feel all the colors of life.

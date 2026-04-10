@@ -46,6 +46,9 @@ with database.engine.connect() as conn:
             conn.execute(text("ALTER TABLE materials ADD COLUMN source_lang VARCHAR DEFAULT 'ru'"))
             conn.execute(text("UPDATE materials SET source_lang = 'ru' WHERE source_lang IS NULL OR source_lang = ''"))
             conn.commit()
+        if "emoji" not in columns:
+            conn.execute(text("ALTER TABLE materials ADD COLUMN emoji VARCHAR"))
+            conn.commit()
 
     # Добавляем source_lang в tests если нет
     if "tests" in inspector.get_table_names():
@@ -159,6 +162,7 @@ def list_materials(
     for m in materials:
         title = m.title
         content = m.content
+        emoji = getattr(m, "emoji", None)
 
         source_lang = (getattr(m, "source_lang", None) or "ru").strip().lower() or "ru"
         if source_lang not in ("ru", "en", "zh"):
@@ -178,6 +182,7 @@ def list_materials(
             "id": m.id,
             "title": title,
             "content": content,
+            "emoji": emoji,
             "created_at": m.created_at,
         })
     return {"materials": result}
@@ -202,7 +207,11 @@ def create_material(
     content = data.content.strip()
     source_lang = detect_ru_en_zh(f"{title}\n{content}")
 
-    m = models.Material(title=title, content=content, source_lang=source_lang, author_id=user.id)
+    emoji = (data.emoji or "").strip() or None
+    if emoji and len(emoji) > 16:
+        raise HTTPException(status_code=400, detail="Emoji is too long")
+
+    m = models.Material(title=title, content=content, emoji=emoji, source_lang=source_lang, author_id=user.id)
     db.add(m)
     db.commit()
     db.refresh(m)
@@ -257,6 +266,12 @@ def update_material(
         if not data.content.strip():
             raise HTTPException(status_code=400, detail="Content cannot be empty")
         m.content = data.content.strip()
+
+    if data.emoji is not None:
+        emoji = (data.emoji or "").strip()
+        if emoji and len(emoji) > 16:
+            raise HTTPException(status_code=400, detail="Emoji is too long")
+        m.emoji = (emoji or None)
 
     # Re-detect source language after any edits
     m.source_lang = detect_ru_en_zh(f"{m.title}\n{m.content}")
