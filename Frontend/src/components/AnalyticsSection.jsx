@@ -23,7 +23,7 @@ const AnalyticsSection = () => {
     try {
       const [testRes, journalRes] = await Promise.all([
         apiService.get("/test/results").catch(() => ({ results: [] })),
-        apiService.get("/journal").catch(() => ({ journals: [] })),
+        apiService.get(`/journal?lang=${encodeURIComponent(lang || "ru")}`).catch(() => ({ journals: [] })),
       ]);
       setTestData(
         (testRes.results || [])

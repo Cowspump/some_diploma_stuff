@@ -7,10 +7,9 @@ export const createTest = async (testData) => {
 };
 
 export const getTests = async (lang = "ru") => {
-  let endpoint = '/tests';
-  if (lang && lang !== "ru") {
-    endpoint += `?lang=${lang}`;
-  }
+  // Always request language explicitly so RU can also be served as a translation
+  // for tests whose source_lang is not Russian.
+  const endpoint = `/tests?lang=${encodeURIComponent(lang || "ru")}`;
   const response = await apiService.get(endpoint);
   return response.tests || [];
 };
@@ -22,10 +21,10 @@ export const deleteTest = async (testId) => {
 
 // --- Вопросы ---
 export const fetchTestQuestions = async (testId, lang = "ru") => {
-  let endpoint = testId ? `/test/questions?test_id=${testId}` : '/test/questions';
-  if (lang && lang !== "ru") {
-    endpoint += (endpoint.includes('?') ? '&' : '?') + `lang=${lang}`;
-  }
+  // Always request language explicitly so RU can also be served as a translation
+  // for questions whose source_lang is not Russian.
+  const base = testId ? `/test/questions?test_id=${testId}` : "/test/questions";
+  const endpoint = `${base}${base.includes("?") ? "&" : "?"}lang=${encodeURIComponent(lang || "ru")}`;
   const response = await apiService.get(endpoint);
   return response.questions || [];
 };

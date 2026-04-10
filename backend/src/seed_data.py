@@ -13,15 +13,15 @@ import re
 
 logger = logging.getLogger(__name__)
 
-THERAPIST = {"full_name": "Dr. Anna Petrova", "mail": "anna@test.com", "password": "password123", "role": "therapist"}
+THERAPIST = {"full_name": "Dr. Anna Petrova", "mail": "anna.petrova@gmail.com", "password": "password123", "role": "therapist"}
 WORKERS = [
-    {"full_name": "Иван Сидоров", "mail": "ivan@test.com", "password": "password123", "role": "worker"},
-    {"full_name": "Maria Chen", "mail": "maria@test.com", "password": "password123", "role": "worker"},
-    {"full_name": "Алексей Козлов", "mail": "alexey@test.com", "password": "password123", "role": "worker"},
-    {"full_name": "Li Wei", "mail": "liwei@test.com", "password": "password123", "role": "worker"},
-    {"full_name": "王小明", "mail": "wangxm@test.com", "password": "password123", "role": "worker"},
-    {"full_name": "张伟", "mail": "zhangwei@test.com", "password": "password123", "role": "worker"},
-    {"full_name": "刘欣怡", "mail": "liuxy@test.com", "password": "password123", "role": "worker"},
+    {"full_name": "Иван Сидоров", "mail": "ivan.sidorov@gmail.com", "password": "password123", "role": "worker"},
+    {"full_name": "Maria Chen", "mail": "maria.chen@gmail.com", "password": "password123", "role": "worker"},
+    {"full_name": "Алексей Козлов", "mail": "alexey.kozlov@gmail.com", "password": "password123", "role": "worker"},
+    {"full_name": "Li Wei", "mail": "li.wei@gmail.com", "password": "password123", "role": "worker"},
+    {"full_name": "Wang Xiaoming", "mail": "wang.xiaoming@gmail.com", "password": "password123", "role": "worker"},
+    {"full_name": "Zhang Wei", "mail": "zhang.wei@gmail.com", "password": "password123", "role": "worker"},
+    {"full_name": "Liu Xinyi", "mail": "liu.xinyi@gmail.com", "password": "password123", "role": "worker"},
 ]
 
 def _extract_title(line: str) -> str | None:
@@ -1432,6 +1432,36 @@ JOURNAL_NOTES = [
     (4, "Продуктивный день"),
 ]
 
+JOURNAL_PHRASES = [
+    "Сегодня получилось сосредоточиться на задачах.",
+    "Было сложно из-за дедлайнов, но в целом справился(ась).",
+    "Чувствую усталость, хотелось бы больше отдыха.",
+    "Поймал(а) себя на тревожных мыслях, сделал(а) паузу и стало легче.",
+    "Настроение нестабильное, но есть ощущение прогресса.",
+    "Немного раздражительность, возможно из-за сна.",
+    "Сон был лучше, энергии больше.",
+    "Было трудно общаться, хотелось побыть одному/одной.",
+]
+
+
+def _rand_dt_between(start: datetime, end: datetime) -> datetime:
+    if end <= start:
+        return start
+    span = int((end - start).total_seconds())
+    return start + timedelta(seconds=random.randint(0, span))
+
+
+def _make_note(base: str | None) -> str | None:
+    # Keep some empty notes
+    if base is None:
+        return None
+    # Vary length: sometimes short, sometimes longer with 2-4 extra sentences
+    extra_count = random.choices([0, 1, 2, 3], weights=[35, 35, 20, 10])[0]
+    parts = [base]
+    for _ in range(extra_count):
+        parts.append(random.choice(JOURNAL_PHRASES))
+    return " ".join(parts).strip()
+
 
 def seed_database(db: Session):
     """Populate DB with test data if no users exist."""
@@ -1518,28 +1548,43 @@ def seed_database(db: Session):
         db.flush()
 
     # Workers take tests
+    # Wider range of dates: Feb -> Apr (inclusive)
+    start_dt = datetime(2026, 2, 1, 9, 0, 0)
+    end_dt = datetime(2026, 4, 9, 21, 0, 0)
+
     for i, worker in enumerate(workers):
         profile = WORKER_PROFILES[i % len(WORKER_PROFILES)]
+        # Each worker takes each test multiple times across the date range
         for test in all_tests:
-            total_score = 0
-            for question in test.questions:
-                idx = random.randint(profile["min"], min(profile["max"], len(question.options) - 1))
-                total_score += question.options[idx]["points"]
+            attempts = random.randint(4, 10)
+            for _ in range(attempts):
+                total_score = 0
+                for question in test.questions:
+                    idx = random.randint(profile["min"], min(profile["max"], len(question.options) - 1))
+                    total_score += question.options[idx]["points"]
 
-            days_ago = random.randint(0, 21)
-            created_at = datetime.utcnow() - timedelta(days=days_ago, hours=random.randint(0, 22))
-            result = models.TestResult(total_score=total_score, user_id=worker.id, test_id=test.id, created_at=created_at)
-            db.add(result)
+                created_at = _rand_dt_between(start_dt, end_dt)
+                result = models.TestResult(
+                    total_score=total_score,
+                    user_id=worker.id,
+                    test_id=test.id,
+                    created_at=created_at,
+                )
+                db.add(result)
 
         # Journal entries
-        for _ in range(random.randint(4, 8)):
+        for _ in range(random.randint(25, 55)):
             score, note = random.choice(JOURNAL_NOTES)
-            days_ago = random.randint(0, 21)
-            created_at = datetime.utcnow() - timedelta(days=days_ago, hours=random.randint(0, 22))
-            entry = models.Journal(wellbeing_score=score, note_text=note, user_id=worker.id, created_at=created_at)
+            created_at = _rand_dt_between(start_dt, end_dt)
+            entry = models.Journal(
+                wellbeing_score=score,
+                note_text=_make_note(note),
+                user_id=worker.id,
+                created_at=created_at,
+            )
             db.add(entry)
 
     db.commit()
     logger.info("Seed data created successfully!")
-    logger.info("Therapist: anna@test.com / password123")
-    logger.info("Workers: ivan@test.com, maria@test.com, alexey@test.com, liwei@test.com (all password123)")
+    logger.info("Therapist: %s / %s", THERAPIST["mail"], THERAPIST["password"])
+    logger.info("Workers (all %s): %s", WORKERS[0]["password"], ", ".join([w["mail"] for w in WORKERS[:5]]))

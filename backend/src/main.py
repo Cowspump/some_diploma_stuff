@@ -7,15 +7,17 @@ import os
 import models, auth, database
 import schemas
 from api import gpt_client
-from api.test_translation_tasks import translate_test_task, translate_question_task, translate_material_task
+from api.test_translation_tasks import (
+    translate_test_task,
+    translate_question_task,
+    translate_material_task,
+    translate_journal_task,
+)
+from api.lang_detect import detect_ru_en_zh
 from seed_data import seed_database
 from sqlalchemy import func
 
 models.Base.metadata.create_all(bind=database.engine)
-
-# Auto-seed test data if DB is empty
-with database.SessionLocal() as db:
-    seed_database(db)
 
 # Миграция: добавляем новые колонки в существующие таблицы
 from sqlalchemy import inspect, text
@@ -36,6 +38,46 @@ with database.engine.connect() as conn:
         if "test_id" not in columns:
             conn.execute(text("ALTER TABLE test_results ADD COLUMN test_id INTEGER REFERENCES tests(id)"))
             conn.commit()
+
+    # Добавляем source_lang в materials если нет
+    if "materials" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("materials")]
+        if "source_lang" not in columns:
+            conn.execute(text("ALTER TABLE materials ADD COLUMN source_lang VARCHAR DEFAULT 'ru'"))
+            conn.execute(text("UPDATE materials SET source_lang = 'ru' WHERE source_lang IS NULL OR source_lang = ''"))
+            conn.commit()
+
+    # Добавляем source_lang в tests если нет
+    if "tests" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("tests")]
+        if "source_lang" not in columns:
+            conn.execute(text("ALTER TABLE tests ADD COLUMN source_lang VARCHAR DEFAULT 'ru'"))
+            conn.execute(text("UPDATE tests SET source_lang = 'ru' WHERE source_lang IS NULL OR source_lang = ''"))
+            conn.commit()
+
+    # Добавляем source_lang в questions если нет
+    if "questions" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("questions")]
+        if "source_lang" not in columns:
+            conn.execute(text("ALTER TABLE questions ADD COLUMN source_lang VARCHAR DEFAULT 'ru'"))
+            conn.execute(text("UPDATE questions SET source_lang = 'ru' WHERE source_lang IS NULL OR source_lang = ''"))
+            conn.commit()
+
+    # Добавляем source_lang в journals если нет
+    if "journals" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("journals")]
+        if "source_lang" not in columns:
+            conn.execute(text("ALTER TABLE journals ADD COLUMN source_lang VARCHAR DEFAULT 'ru'"))
+            conn.execute(text("UPDATE journals SET source_lang = 'ru' WHERE source_lang IS NULL OR source_lang = ''"))
+            conn.commit()
+
+    # Создаём таблицу journal_translations если её нет
+    if "journal_translations" not in inspector.get_table_names():
+        models.JournalTranslation.__table__.create(bind=conn)
+
+# Auto-seed test data if DB is empty
+with database.SessionLocal() as db:
+    seed_database(db)
 
 app = FastAPI(title="Psychology & AI System")
 
@@ -107,16 +149,26 @@ def list_materials(
         lang: Optional[str] = Query(None),
         db: Session = Depends(database.get_db),
 ):
+    # Default requested language is Russian even if query param isn't provided
+    requested_lang = (lang or "ru").strip().lower()
+    if requested_lang not in ("ru", "en", "zh"):
+        requested_lang = "ru"
+
     materials = db.query(models.Material).order_by(models.Material.created_at.desc()).all()
     result = []
     for m in materials:
         title = m.title
         content = m.content
 
-        if lang and lang != "ru":
+        source_lang = (getattr(m, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in ("ru", "en", "zh"):
+            source_lang = "ru"
+
+        # If client requests the original language, never substitute with cached translations.
+        if requested_lang != source_lang:
             cached = db.query(models.MaterialTranslation).filter(
                 models.MaterialTranslation.material_id == m.id,
-                models.MaterialTranslation.lang == lang,
+                models.MaterialTranslation.lang == requested_lang,
             ).first()
             if cached:
                 title = cached.translated_title
@@ -146,12 +198,17 @@ def create_material(
     if not data.content.strip():
         raise HTTPException(status_code=400, detail="Content is required")
 
-    m = models.Material(title=data.title.strip(), content=data.content.strip(), author_id=user.id)
+    title = data.title.strip()
+    content = data.content.strip()
+    source_lang = detect_ru_en_zh(f"{title}\n{content}")
+
+    m = models.Material(title=title, content=content, source_lang=source_lang, author_id=user.id)
     db.add(m)
     db.commit()
     db.refresh(m)
 
-    background_tasks.add_task(translate_material_task, m.id, auto_install_models=True)
+    # Avoid heavy Argos model downloads in the web process; hybrid translator can fallback to LLM.
+    background_tasks.add_task(translate_material_task, m.id, auto_install_models=False)
     return {"message": "Material created", "material_id": m.id}
 
 
@@ -201,10 +258,13 @@ def update_material(
             raise HTTPException(status_code=400, detail="Content cannot be empty")
         m.content = data.content.strip()
 
+    # Re-detect source language after any edits
+    m.source_lang = detect_ru_en_zh(f"{m.title}\n{m.content}")
+
     db.commit()
     db.refresh(m)
 
-    background_tasks.add_task(translate_material_task, m.id, auto_install_models=True)
+    background_tasks.add_task(translate_material_task, m.id, auto_install_models=False)
     return {"message": "Material updated", "material_id": m.id}
 
 
@@ -248,17 +308,28 @@ def log_wellbeing(
 ):
     if not (0 <= data.score <= 5):
         raise HTTPException(status_code=400, detail="Score must be 0-5")
-    entry = models.Journal(wellbeing_score=data.score, note_text=data.note, user_id=user.id)
+    note = (data.note or "").strip() or None
+    source_lang = detect_ru_en_zh(note or "")
+    entry = models.Journal(wellbeing_score=data.score, note_text=note, source_lang=source_lang, user_id=user.id)
     db.add(entry)
     db.commit()
+    db.refresh(entry)
 
     background_tasks.add_task(gpt_client.generate_user_summaries_task, user.id)
+    background_tasks.add_task(translate_journal_task, entry.id, auto_install_models=False)
     return {"status": "success"}
 
 
 @app.get("/journal", response_model=schemas.JournalsResponse, tags=["journal"])
-def get_recent_journals(user: models.User = Depends(auth.get_current_user),
-                        db: Session = Depends(database.get_db)):
+def get_recent_journals(
+    lang: Optional[str] = Query(None),
+    user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    requested_lang = (lang or "ru").strip().lower()
+    if requested_lang not in ("ru", "en", "zh"):
+        requested_lang = "ru"
+
     journals = (
         db.query(models.Journal)
         .filter(models.Journal.user_id == user.id)
@@ -266,7 +337,30 @@ def get_recent_journals(user: models.User = Depends(auth.get_current_user),
         .limit(5)
         .all()
     )
-    return {"message": "Journals fetched", "journals": journals}
+
+    if requested_lang != "ru":
+        # We'll still translate RU->(others) at display time if needed via cached translations
+        pass
+
+    out = []
+    for j in journals:
+        source_lang = (getattr(j, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in ("ru", "en", "zh"):
+            source_lang = "ru"
+
+        if requested_lang != source_lang and (j.note_text or "").strip():
+            cached = (
+                db.query(models.JournalTranslation)
+                .filter(models.JournalTranslation.journal_id == j.id, models.JournalTranslation.lang == requested_lang)
+                .first()
+            )
+            if cached:
+                # return a lightweight object with overridden note_text
+                j.note_text = cached.translated_note_text
+
+        out.append(j)
+
+    return {"message": "Journals fetched", "journals": out}
 
 
 @app.delete("/journal/{journal_id}", tags=["journal"])
@@ -295,13 +389,17 @@ def create_test(
     if user.role != models.UserRole.therapist:
         raise HTTPException(status_code=403, detail="Только терапевты могут создавать тесты")
 
-    new_test = models.Test(title=data.title, description=data.description, therapist_id=user.id)
+    title = (data.title or "").strip()
+    description = (data.description or "").strip() if data.description else None
+    source_lang = detect_ru_en_zh(f"{title}\n{description or ''}")
+
+    new_test = models.Test(title=title, description=description, source_lang=source_lang, therapist_id=user.id)
     db.add(new_test)
     db.commit()
     db.refresh(new_test)
 
     # Offline translations (ru->en/zh) stored in DB cache
-    background_tasks.add_task(translate_test_task, new_test.id, auto_install_models=True)
+    background_tasks.add_task(translate_test_task, new_test.id, auto_install_models=False)
     return {"message": "Тест создан", "test_id": new_test.id}
 
 
@@ -311,16 +409,25 @@ def get_tests(
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
+    requested_lang = (lang or "ru").strip().lower()
+    if requested_lang not in ("ru", "en", "zh"):
+        requested_lang = "ru"
+
     tests = db.query(models.Test).order_by(models.Test.created_at.desc()).all()
     result = []
     for t in tests:
         title = t.title
         description = t.description
 
-        if lang and lang != "ru":
+        source_lang = (getattr(t, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in ("ru", "en", "zh"):
+            source_lang = "ru"
+
+        # If client requests the original language, never substitute with cached translations.
+        if requested_lang != source_lang:
             cached = db.query(models.TestTranslation).filter(
                 models.TestTranslation.test_id == t.id,
-                models.TestTranslation.lang == lang
+                models.TestTranslation.lang == requested_lang
             ).first()
             if cached:
                 title = cached.translated_title
@@ -372,12 +479,16 @@ def add_question(
 
     options_json = [opt.model_dump() for opt in q_data.options]
 
-    new_q = models.Question(text=q_data.text, options=options_json, test_id=q_data.test_id)
+    q_text = (q_data.text or "").strip()
+    opt_texts = "\n".join([(o.get("text") or "") for o in options_json if isinstance(o, dict)])
+    source_lang = detect_ru_en_zh(f"{q_text}\n{opt_texts}")
+
+    new_q = models.Question(text=q_text, options=options_json, source_lang=source_lang, test_id=q_data.test_id)
     db.add(new_q)
     db.commit()
     db.refresh(new_q)
 
-    background_tasks.add_task(translate_question_task, new_q.id, auto_install_models=True)
+    background_tasks.add_task(translate_question_task, new_q.id, auto_install_models=False)
     return {"message": "Вопрос успешно добавлен"}
 
 
@@ -388,28 +499,41 @@ def get_questions(
         user: models.User = Depends(auth.get_current_user),
         db: Session = Depends(database.get_db)
 ):
+    requested_lang = (lang or "ru").strip().lower()
+    if requested_lang not in ("ru", "en", "zh"):
+        requested_lang = "ru"
+
     query = db.query(models.Question)
     if test_id is not None:
         query = query.filter(models.Question.test_id == test_id)
     questions = query.all()
 
-    if lang and lang != "ru":
-        translated = []
-        for q in questions:
-            cached = db.query(models.QuestionTranslation).filter(
-                models.QuestionTranslation.question_id == q.id,
-                models.QuestionTranslation.lang == lang
-            ).first()
-            if cached:
-                translated.append(schemas.QuestionOut(
-                    id=q.id, text=cached.translated_text,
-                    options=cached.translated_options, test_id=q.test_id
-                ))
-            else:
-                translated.append(q)
-        return {"message": "Questions fetched", "questions": translated}
+    translated = []
+    for q in questions:
+        source_lang = (getattr(q, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in ("ru", "en", "zh"):
+            source_lang = "ru"
 
-    return {"message": "Questions fetched", "questions": questions}
+        if requested_lang == source_lang:
+            translated.append(q)
+            continue
+
+        cached = db.query(models.QuestionTranslation).filter(
+            models.QuestionTranslation.question_id == q.id,
+            models.QuestionTranslation.lang == requested_lang
+        ).first()
+        if cached:
+            translated.append(
+                schemas.QuestionOut(
+                    id=q.id,
+                    text=cached.translated_text,
+                    options=cached.translated_options,
+                    test_id=q.test_id,
+                )
+            )
+        else:
+            translated.append(q)
+    return {"message": "Questions fetched", "questions": translated}
 
 
 @app.delete("/test/question/{question_id}", tags=["testing"])

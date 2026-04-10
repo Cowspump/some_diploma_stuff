@@ -5,7 +5,7 @@ import { apiService } from "../services/api";
 import "../styles/App.css";
 
 const BurnoutScale = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [burnoutLevel, setBurnoutLevel] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,13 +13,13 @@ const BurnoutScale = () => {
     const token = localStorage.getItem("token");
     if (token) loadData();
     else setLoading(false);
-  }, []);
+  }, [lang]);
 
   const loadData = async () => {
     try {
       const [testRes, journalRes] = await Promise.all([
-        apiService.get("/test/results").catch(() => ({ results: [] })),
-        apiService.get("/journal").catch(() => ({ journals: [] })),
+        apiService.get(`/test/results?lang=${encodeURIComponent(lang || "ru")}`).catch(() => ({ results: [] })),
+        apiService.get(`/journal?lang=${encodeURIComponent(lang || "ru")}`).catch(() => ({ journals: [] })),
       ]);
       const results = testRes.results || [];
       const journals = journalRes.journals || [];

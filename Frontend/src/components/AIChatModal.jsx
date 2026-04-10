@@ -51,9 +51,9 @@ const AIChatModal = ({ show, onHide, journalHistory: initialJournalHistory, test
 
   const loadData = async () => {
     try {
-      const journalRes = await apiService.get("/journal");
+      const journalRes = await apiService.get(`/journal?lang=${encodeURIComponent(lang || "ru")}`);
       setJournalHistory(journalRes.journals || []);
-      const testsRes = await apiService.get("/test/results");
+      const testsRes = await apiService.get(`/test/results?lang=${encodeURIComponent(lang || "ru")}`);
       setTestResults(testsRes.results || []);
     } catch (err) { console.error("Error loading data:", err); }
   };

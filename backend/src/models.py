@@ -28,9 +28,20 @@ class Journal(Base):
     id = Column(Integer, primary_key=True, index=True)
     wellbeing_score = Column(Integer)
     note_text = Column(String, nullable=True)
+    # ru/en/zh — derived automatically from note_text
+    source_lang = Column(String, nullable=False, default="ru")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="journals")
+
+
+class JournalTranslation(Base):
+    __tablename__ = "journal_translations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    journal_id = Column(Integer, ForeignKey("journals.id"), nullable=False)
+    lang = Column(String, nullable=False)  # ru/en/zh
+    translated_note_text = Column(String, nullable=False)
 
 
 class Test(Base):
@@ -38,6 +49,8 @@ class Test(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
+    # ru/en/zh — derived automatically from title+description
+    source_lang = Column(String, nullable=False, default="ru")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     therapist_id = Column(Integer, ForeignKey("users.id"))
 
@@ -50,6 +63,8 @@ class Question(Base):
     id = Column(Integer, primary_key=True)
     text = Column(String)
     options = Column(JSON)  # [{'text': 'Хорошо', 'points': 5}, ...]
+    # ru/en/zh — derived automatically from text+options
+    source_lang = Column(String, nullable=False, default="ru")
     test_id = Column(Integer, ForeignKey("tests.id"), nullable=True)
 
     test = relationship("Test", back_populates="questions")
@@ -121,6 +136,8 @@ class Material(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
+    # ru/en/zh — derived automatically from title+content
+    source_lang = Column(String, nullable=False, default="ru")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     author_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 

@@ -10,11 +10,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import database  # noqa: E402
 import models  # noqa: E402
-from api.argos_translate import translate  # noqa: E402
+from api.translation import translate_hybrid  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
 SUPPORTED_TARGET_LANGS = ("en", "zh")
+SUPPORTED_LANGS_ALL = ("ru", "en", "zh")
 
 
 def _upsert_test_translation(db: Session, *, test_id: int, lang: str, title: str, description: str | None) -> None:
@@ -59,7 +60,7 @@ def _upsert_question_translation(db: Session, *, question_id: int, lang: str, te
 
 def translate_test_task(test_id: int, *, auto_install_models: bool = False) -> None:
     """
-    Background task: translate Test title/description ru->en/zh into TestTranslation.
+    Background task: translate Test title/description source_lang->(other langs) into TestTranslation.
     """
     db = database.SessionLocal()
     try:
@@ -72,10 +73,15 @@ def translate_test_task(test_id: int, *, auto_install_models: bool = False) -> N
         if not base_title:
             return
 
+        source_lang = (getattr(test, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in SUPPORTED_LANGS_ALL:
+            source_lang = "ru"
+        targets = [l for l in SUPPORTED_LANGS_ALL if l != source_lang]
+
         changed = False
-        for lang in SUPPORTED_TARGET_LANGS:
-            t_title = translate(base_title, from_lang="ru", to_lang=lang, auto_install=auto_install_models)
-            t_desc = translate(base_desc, from_lang="ru", to_lang=lang, auto_install=auto_install_models) if base_desc else ""
+        for lang in targets:
+            t_title = translate_hybrid(base_title, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models)
+            t_desc = translate_hybrid(base_desc, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models) if base_desc else ""
             if t_title is None:
                 continue
 
@@ -117,6 +123,61 @@ def _upsert_material_translation(db: Session, *, material_id: int, lang: str, ti
     )
 
 
+def _upsert_journal_translation(db: Session, *, journal_id: int, lang: str, note_text: str) -> None:
+    existing = (
+        db.query(models.JournalTranslation)
+        .filter(models.JournalTranslation.journal_id == journal_id, models.JournalTranslation.lang == lang)
+        .first()
+    )
+    if existing:
+        existing.translated_note_text = note_text
+        return
+    db.add(
+        models.JournalTranslation(
+            journal_id=journal_id,
+            lang=lang,
+            translated_note_text=note_text,
+        )
+    )
+
+
+def translate_journal_task(journal_id: int, *, auto_install_models: bool = False) -> None:
+    """
+    Background task: translate Journal note_text source_lang->(other langs) into JournalTranslation.
+    """
+    db = database.SessionLocal()
+    try:
+        j = db.query(models.Journal).filter(models.Journal.id == journal_id).first()
+        if not j:
+            return
+
+        base_note = (j.note_text or "").strip()
+        if not base_note:
+            return
+
+        source_lang = (getattr(j, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in SUPPORTED_LANGS_ALL:
+            source_lang = "ru"
+
+        targets = [l for l in SUPPORTED_LANGS_ALL if l != source_lang]
+
+        changed = False
+        for lang in targets:
+            t_note = translate_hybrid(base_note, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models)
+            if not isinstance(t_note, str) or not t_note.strip():
+                continue
+            _upsert_journal_translation(db, journal_id=j.id, lang=lang, note_text=t_note.strip())
+            changed = True
+
+        if changed:
+            db.commit()
+    except Exception as e:
+        logger.warning("translate_journal_task failed journal_id=%s: %s", journal_id, e, exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
+
+
 def translate_material_task(material_id: int, *, auto_install_models: bool = False) -> None:
     db = database.SessionLocal()
     try:
@@ -129,10 +190,16 @@ def translate_material_task(material_id: int, *, auto_install_models: bool = Fal
         if not base_title:
             return
 
+        source_lang = (getattr(m, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in SUPPORTED_LANGS_ALL:
+            source_lang = "ru"
+
+        targets = [l for l in SUPPORTED_LANGS_ALL if l != source_lang]
+
         changed = False
-        for lang in SUPPORTED_TARGET_LANGS:
-            t_title = translate(base_title, from_lang="ru", to_lang=lang, auto_install=auto_install_models)
-            t_content = translate(base_content, from_lang="ru", to_lang=lang, auto_install=auto_install_models) if base_content else ""
+        for lang in targets:
+            t_title = translate_hybrid(base_title, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models)
+            t_content = translate_hybrid(base_content, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models) if base_content else ""
             if t_title is None:
                 continue
 
@@ -156,7 +223,7 @@ def translate_material_task(material_id: int, *, auto_install_models: bool = Fal
 
 def translate_question_task(question_id: int, *, auto_install_models: bool = False) -> None:
     """
-    Background task: translate Question text/options ru->en/zh into QuestionTranslation.
+    Background task: translate Question text/options source_lang->(other langs) into QuestionTranslation.
     """
     db = database.SessionLocal()
     try:
@@ -169,9 +236,14 @@ def translate_question_task(question_id: int, *, auto_install_models: bool = Fal
         if not base_text or not isinstance(base_options, list):
             return
 
+        source_lang = (getattr(q, "source_lang", None) or "ru").strip().lower() or "ru"
+        if source_lang not in SUPPORTED_LANGS_ALL:
+            source_lang = "ru"
+        targets = [l for l in SUPPORTED_LANGS_ALL if l != source_lang]
+
         changed = False
-        for lang in SUPPORTED_TARGET_LANGS:
-            t_text = translate(base_text, from_lang="ru", to_lang=lang, auto_install=auto_install_models)
+        for lang in targets:
+            t_text = translate_hybrid(base_text, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models)
             if t_text is None:
                 continue
 
@@ -183,7 +255,7 @@ def translate_question_task(question_id: int, *, auto_install_models: bool = Fal
                 if not isinstance(opt_text, str):
                     ok_all = False
                     break
-                translated_opt = translate(opt_text, from_lang="ru", to_lang=lang, auto_install=auto_install_models)
+                translated_opt = translate_hybrid(opt_text, from_lang=source_lang, to_lang=lang, auto_install_models=auto_install_models)
                 if translated_opt is None:
                     ok_all = False
                     break

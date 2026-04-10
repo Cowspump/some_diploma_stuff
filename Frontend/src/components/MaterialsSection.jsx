@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Button, Modal } from "react-bootstrap";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import rehypeSanitize from "rehype-sanitize";
 import { useLanguage } from "../contexts/LanguageContext";
 import { apiService } from "../services/api";
@@ -19,10 +20,9 @@ const MaterialsSection = () => {
   useEffect(() => {
     (async () => {
       try {
-        let endpoint = "/materials";
-        if (lang && lang !== "ru") {
-          endpoint += `?lang=${lang}`;
-        }
+        // Always request language explicitly so RU can also be served as a translation
+        // for materials whose source_lang is not Russian.
+        const endpoint = `/materials?lang=${encodeURIComponent(lang || "ru")}`;
         const res = await apiService.get(endpoint);
         setMaterials(res.materials || []);
       } catch {
@@ -109,7 +109,7 @@ const MaterialsSection = () => {
         </Modal.Header>
         <Modal.Body>
           <div className="markdown-body" style={{ color: "inherit" }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeSanitize]}>
               {selected?.content || ""}
             </ReactMarkdown>
           </div>

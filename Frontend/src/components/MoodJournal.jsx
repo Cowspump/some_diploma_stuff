@@ -26,11 +26,11 @@ const MoodJournal = ({ isLoggedIn }) => {
 
   useEffect(() => {
     if (isLoggedIn) loadJournals();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, lang]);
 
   const loadJournals = async () => {
     try {
-      const response = await apiService.get("/journal");
+      const response = await apiService.get(`/journal?lang=${encodeURIComponent(lang || "ru")}`);
       setEntries(response.journals || []);
     } catch {
       setError(t("journal_load_error"));

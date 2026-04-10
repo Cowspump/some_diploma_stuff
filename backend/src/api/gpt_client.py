@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 import logging
 import os
 from sqlalchemy.orm import Session
@@ -11,7 +10,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import models
 import database
 
-load_dotenv()
+from dotenv import load_dotenv
+
+# Load .env reliably regardless of current working directory
+load_dotenv(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".env")))
 
 from openai import OpenAI
 
